@@ -46,44 +46,37 @@ export default class Admin extends React.Component {
 
   componentDidMount() {
     const user = auth().currentUser;
-    console.log('user', user);
+    // console.log('user', user);
     firebase
       .database()
       .ref('User')
       .on('value', (snapshot) => {
-        console.log('snapshot.val()', snapshot.val());
+        // console.log('snapshot.val()', snapshot.val());
         const getValue = snapshot.val();
-        console.log('getValue', getValue);
+        // console.log('getValue', getValue);
         let array = [];
         for (let key in getValue) {
           // console.log("key", key)
           const value = {...getValue[key], key};
           array.push(value);
         }
-        console.log(array, 'array');
+        // console.log(array, 'array');
         const currentUser = array.filter(
           (el) => el.email.toLowerCase() === user.email.toLowerCase(),
         );
-        console.log('currentUser[0]', currentUser);
+        // console.log('currentUser[0]', currentUser);
         this.setState({
           name: currentUser[0].name,
         });
       });
   }
 
-  viewBookedUsersList() {
-    this.setState = {
-      isLoading: false,
-    };
-    this.props.navigation.navigate('viewBookedUsersList');
-  }
-
-  viewFeedBackList() {
-    this.setState = {
-      isLoading: false,
-    };
-    this.props.navigation.navigate('viewFeedBackList');
-  }
+  // viewBookedUsersList() {
+  //   this.setState = {
+  //     isLoading: false,
+  //   };
+  //   this.props.navigation.navigate('viewBookedUsersList');
+  // }
 
   viewUsersList() {
     this.setState = {
@@ -97,6 +90,20 @@ export default class Admin extends React.Component {
       isLoading: false,
     };
     this.props.navigation.navigate('Profile');
+  }
+
+  location() {
+    this.setState = {
+      isLoading: false,
+    };
+    this.props.navigation.navigate('Location');
+  }
+
+  locationView() {
+    this.setState = {
+      isLoading: false,
+    };
+    this.props.navigation.navigate('LocationView');
   }
 
   signOut() {
@@ -136,19 +143,27 @@ export default class Admin extends React.Component {
                 </TouchableOpacity>
               </View>
 
-              <View style={{marginVertical: 10}}>
+              {/* <View style={{marginVertical: 10}}>
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() => this.viewBookedUsersList()}>
                   <Text style={styles.buttonText}>View Booked Users List</Text>
+                </TouchableOpacity>
+              </View> */}
+
+              <View style={{marginVertical: 10}}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => this.location()}>
+                  <Text style={styles.buttonText}>Create Location Areas</Text>
                 </TouchableOpacity>
               </View>
 
               <View style={{marginVertical: 10}}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => this.viewFeedBackList()}>
-                  <Text style={styles.buttonText}>View FeedBack Users List</Text>
+                  onPress={() => this.locationView()}>
+                  <Text style={styles.buttonText}>View Location Areas </Text>
                 </TouchableOpacity>
               </View>
 

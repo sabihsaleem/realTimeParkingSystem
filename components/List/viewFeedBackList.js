@@ -24,51 +24,30 @@ export default class viewFeedBackList extends React.Component {
     super(props);
     this.state = {
       isLoading: true,
-      viewFeedBackList:[],
-      feedBackKey:'',
+      dataArray:[],
     };
   }
+
   componentDidMount = () => {
     const user = auth().currentUser;
     console.log('user', user);
-    firebase
-      .database()
-      .ref('User')
-      .on('value', (snapshot) => {
-        console.log("snapshot.val()", snapshot.val())
-        const getValue = snapshot.val();
-        console.log("getValue", getValue)
-        let viewList = [];
-        for (let key in getValue) {
-          // console.log("key", key)
-          const value = {...getValue[key], key};
-          viewList.push(value);
-        }
-        console.log(viewList, 'viewList');
-        const FeedBack = viewList.filter(el => el.email === user.email)
-        console.log("key", FeedBack)
-        this.setState({
-            feedBackKey:FeedBack[0].key,
-        });
+    console.log("this.props",this.props.route.params.item.FeedBack)
+    let data = this.props.route.params.item.FeedBack
+    if(data==undefined){
+      this.setState({
+        dataArray: null,
       });
-    //   firebase
-    //   .database()
-    //   .ref('User/',this.state.feedBackKey,'/FeedBack')
-    //   .on('value', (snapshot) => {
-    //     console.log("viewFeedBackList.val()", snapshot.val())
-    //     const getValue = snapshot.val();
-    //     console.log("viewFeedBackListgetValue", getValue)
-    //     let viewFeedBackList = [];
-    //     for (let key in getValue) {
-    //       // console.log("key", key)
-    //       const value = {...getValue[key], key};
-    //       viewFeedBackList.push(value);
-    //     }
-    //     console.log(viewFeedBackList, 'viewFeedBackList');
-    //     this.setState({
-    //         viewFeedBackList,
-    //     });
-    //   });
+    }else{
+      let dataArray = []
+      for(let keyData in data){
+        const value = {...data[keyData], keyData}
+        dataArray.push(value)
+      }
+      console.log('dataArray',dataArray)
+      this.setState({
+        dataArray,
+      });
+    }
   };
 
   emptyComponent = () => {
@@ -103,8 +82,8 @@ export default class viewFeedBackList extends React.Component {
   };
 
   render() {
-    const {viewFeedBackList,feedBackKey} = this.state
-    console.log("feedBackKey",feedBackKey)
+    const {dataArray} = this.state
+    console.log("dataArray",dataArray)
     return (
       <View
         style={styles.main}>
@@ -128,7 +107,7 @@ export default class viewFeedBackList extends React.Component {
             <View style={styles.container1}>
               <FlatList
                 style={styles.list}
-                data={viewFeedBackList}
+                data={dataArray}
                 ListEmptyComponent={() => this.emptyComponent()}
                 renderItem={({item, index}) => (
                   <View
@@ -137,32 +116,59 @@ export default class viewFeedBackList extends React.Component {
                     
                       <View style={{justifyContent: 'space-between'}}>
                         <Text
-                          style={styles.flatListNameText}>
+                          style={styles.flatListText}>
                           {item.name}
                         </Text>
-                        <View
-                          style={styles.flatListEmailTimeView}>
-                          <View>
-                            <Text
-                              style={styles.flatListEmailText}>
-                              {item.email}
-                            </Text>
-                          </View>
-                          <View>
-                            <Text
-                              style={styles.flatListTimeText}>
-                              {item.time}
-                            </Text>
-                          </View>
+                        <View style={styles.flatListInner}>
+                          <Text
+                            style={styles.flatListHeaderText}>
+                            Email:
+                          </Text>
+                          <Text
+                            style={styles.flatListText}>
+                            {item.email}
+                          </Text>
                         </View>
-                        <Text
-                          style={styles.flatListVehicleName}>
-                          {item.vehicleName}
-                        </Text>
-                        <Text
-                          style={styles.flatListVehicleType}>
-                          {item.vehicleType}
-                        </Text>
+                        <View style={styles.flatListInner}>
+                          <Text
+                            style={styles.flatListHeaderText}>
+                            Review:
+                          </Text>
+                          <Text
+                            style={styles.flatListText}>
+                            {item.review}
+                          </Text>
+                        </View>
+                        <View style={styles.flatListInner}>
+                          <Text
+                            style={styles.flatListHeaderText}>
+                            Country:
+                          </Text>
+                          <Text
+                            style={styles.flatListText}>
+                            {item.country}
+                          </Text>
+                        </View>
+                        <View style={styles.flatListInner}>
+                          <Text
+                            style={styles.flatListHeaderText}>
+                            City:
+                          </Text>
+                          <Text
+                            style={styles.flatListText}>
+                            {item.city}
+                          </Text>
+                        </View>
+                        <View style={styles.flatListInner}>
+                          <Text
+                            style={styles.flatListHeaderText}>
+                            Comments
+                          </Text>
+                          <Text
+                            style={styles.flatListText}>
+                            {item.comments}
+                          </Text>
+                        </View>
                       </View>
 
                     </View>
@@ -237,31 +243,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     alignSelf: 'center',
   },
-  flatListEmailTimeView: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    marginVertical: 5,
-    borderWidth: 0.5,
+  flatListInner: {
+    flexDirection:'row',
+    justifyContent:'space-between'
   },
-  flatListEmailText: {
+  flatListHeaderText:{
     paddingHorizontal: 20,
     color: 'black',
     fontSize: 18,
+    fontWeight:'bold',
+    width: wp('35%'),
   },
-  flatListTimeText: {
+  flatListText: {
     paddingHorizontal: 20,
     color: 'black',
     fontSize: 18,
-  },
-  flatListVehicleName: {
-    paddingHorizontal: 20,
-    color: 'black',
-    fontSize: 18,
-  },
-  flatListVehicleType: {
-    paddingHorizontal: 20,
-    color: 'black',
-    fontSize: 18,
+    width: wp('60%'),
   },
   //container2 View
   container2: {

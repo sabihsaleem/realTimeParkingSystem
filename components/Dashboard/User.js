@@ -40,68 +40,152 @@ export default class User extends React.Component {
         isLoading: true,
         name: '',
         bookingKey: '',
-        feedbackKey:''
+        feedbackKey:'',
+        keyCurrentUser:''
     };
-}
+  }
 
   componentDidMount() {
     const user = auth().currentUser;
-    console.log('user', user);
+    // console.log('user', user);
     firebase
       .database()
       .ref('User')
       .on('value', (snapshot) => {
-        console.log("snapshot.val()", snapshot.val())
+        // console.log("snapshot.val()", snapshot.val())
         const getValue = snapshot.val();
-        console.log("getValue", getValue)
+        // console.log("getValue", getValue)
         let array = [];
         for (let key in getValue) {
           // console.log("key", key)
           const value = {...getValue[key], key};
           array.push(value);
         }
-        console.log(array, 'array');
+        // console.log(array, 'array');
         const currentUser = array.filter(
           (el) => el.email.toLowerCase() === user.email.toLowerCase(),
         );
-        console.log('currentUser', currentUser);
-        console.log('currentUser[0].Booking', currentUser[0].Booking);
-        let bookingValue = currentUser[0].Booking
-
-        console.log('currentUser[0].Feedback', currentUser[0].FeedBack);
-        let feedbackValue = currentUser[0].FeedBack
-        if(bookingValue===undefined && feedbackValue===undefined){
-            this.setState({
-                name: currentUser[0].name,
-                bookingKey: null,
-                feedbackKey: null,
-            });
+        // console.log('currentUser', currentUser);
+        // console.log('currentUser[0].Feedback', currentUser[0].FeedBack);
+        let feedbackValue = currentUser[0]?.FeedBack
+        if(feedbackValue===undefined){
+          this.setState({
+              name: currentUser[0]?.name,
+              feedbackKey: null,
+              keyCurrentUser:currentUser[0]?.key
+          });
         }else{
-            
-            let bookingData = []
-            for(let bookingKey in bookingValue){
-                const value = {...bookingValue[bookingKey],bookingKey}
-                bookingData.push(value)
-            }
-            console.log("bookingData",bookingData)
-            console.log("bookingData[0].bookingKey",bookingData[0].bookingKey)
+          let feedbackData = []
+          for(let feedbackKey in feedbackValue){
+              const value = {...feedbackValue[feedbackKey],feedbackKey}
+              feedbackData.push(value)
+          }
+          // console.log("feedbackData",feedbackData)
+          // console.log("feedbackData[0].feedbackKey",feedbackData[0].feedbackKey)
 
-            let feedbackData = []
-            for(let feedbackKey in feedbackValue){
-                const value = {...feedbackValue[feedbackKey],feedbackKey}
-                feedbackData.push(value)
-            }
-            console.log("feedbackData",feedbackData)
-            console.log("feedbackData[0].feedbackKey",feedbackData[0].feedbackKey)
-
-            this.setState({
-                name: currentUser[0].name,
-                bookingKey: bookingData[0].bookingKey,
-                feedbackKey: feedbackData[0].feedbackKey,
-            });
+          this.setState({
+              name: currentUser[0]?.name,
+              feedbackKey: feedbackData[0]?.feedbackKey,
+              keyCurrentUser:currentUser[0]?.key
+          });
         }
-        
+
+        // console.log('currentUser[0].Booking', currentUser[0].Booking);
+        let bookingValue = currentUser[0]?.Booking
+        if(bookingValue===undefined){
+          this.setState({
+              name: currentUser[0]?.name,
+              bookingKey: null,
+              keyCurrentUser:currentUser[0]?.key
+          });
+        }else{
+          let bookingData = []
+          for(let bookingKey in bookingValue){
+              const value = {...bookingValue[bookingKey],bookingKey}
+              bookingData.push(value)
+          }
+          // console.log("bookingData",bookingData)
+          // console.log("bookingData[0].bookingKey",bookingData[0].bookingKey)
+
+          this.setState({
+              name: currentUser[0]?.name,
+              bookingKey: bookingData[0]?.bookingKey,
+              keyCurrentUser:currentUser[0]?.key
+          });
+        }
+
     });
+      firebase
+      .database()
+      .ref('Location')
+      .on('value', (snapshot) => {
+        // console.log("Location.val()", snapshot.val())
+        const getValue = snapshot.val();
+        // console.log("Location", getValue)
+        let arrayLocation = [];
+        for (let keyLocation in getValue) {
+          const value = {...getValue[keyLocation], keyLocation};
+          arrayLocation.push(value);
+        }
+        // console.log(arrayLocation, 'arrayLocation');
+
+        let dateCurrent = new Date();
+        dateCurrent.getTime()
+        dateCurrent.setSeconds(0);
+        dateCurrent.setMilliseconds(0);
+        for(let keydata of arrayLocation){
+          // console.log('keydata',keydata)
+          if(keydata.Slots){
+            let slots = keydata.Slots
+            // console.log('keydata.Slots',slots)
+            for(let keydataSlots in slots){
+              // console.log('keydata.Slots[keydataSlots]',slots[keydataSlots],keydataSlots)
+              if(slots[keydataSlots].bookedUsers){
+                let bookedUsers = slots[keydataSlots].bookedUsers
+                // console.log('keydata.Slots[keydataSlots].bookedUsers',bookedUsers)
+                for(let key in bookedUsers){
+                  // console.log('bookedUsers[key].startTimeStamp',bookedUsers[key].startTimeStamp)
+                  // console.log('bookedUsers[key].endTimeStamp',bookedUsers[key].endTimeStamp)
+                  // console.log('bookedUsers[key]',bookedUsers[key])
+                  let date = new Date(bookedUsers[key].startTimeStamp);
+                  // console.log(date.getTime(),'date',date)
+                  let condition = 
+                                  dateCurrent.getTime()>=bookedUsers[key].endTimeStamp
+                                  &&
+                                  dateCurrent.getFullYear()===date.getFullYear()
+                                  &&
+                                  dateCurrent.getMonth()===date.getMonth()
+                                  &&
+                                  dateCurrent.getDate()===date.getDate()
+                                  &&
+                                  key===bookedUsers[key].UserKey
+                  // console.log('condition',condition)
+                  if(condition){
+                    // console.log('true')
+                    // console.log(key,'userKey',keydata.keyLocation,'keyLocation',keydataSlots,'keySlots')
+                    let deleted = 'Location/'+keydata.keyLocation+'/Slots/'+keydataSlots+'/bookedUsers/'+key
+                    console.log('deleted',deleted)
+                    firebase.database().ref(deleted).remove();
+                    let deletes = 'User/'+this.state.keyCurrentUser+'/Booking/'+this.state.bookingKey
+                    console.log('deleted',deletes)
+                    firebase.database().ref(deleted).remove();
+                    Alert.alert('Thank You!',bookedUsers[key].name+' for booking our RPS.')
+                  }else{
+                    console.log('false')
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+  }
+
+  locationView() {
+    this.setState = {
+      isLoading: false,
+    };
+    this.props.navigation.navigate('checkLocation');
   }
 
   profile() {
@@ -121,16 +205,14 @@ export default class User extends React.Component {
       });
   }
 
-  addBooking() {
-    { this.state.bookingKey ? false : this.props.navigation.navigate('ADDBooking') }
-  }
-
   feedBack() {
     { this.state.feedbackKey ? false : this.props.navigation.navigate('FeedBack') }
   }
 
   render() {
-    const {name,bookingKey,feedbackKey} = this.state
+    const {name,feedbackKey,bookingKey,keyCurrentUser} = this.state
+    let deletes = 'User/'+keyCurrentUser+'/Booking/'+bookingKey
+    // console.log('deleted',deletes)
     return (
       <View style={styles.image}>
         {this.state.isLoading ? (
@@ -154,18 +236,17 @@ export default class User extends React.Component {
               <View style={{marginVertical: 10}}>
                 <TouchableOpacity
                   style={styles.button}
-                  disabled={bookingKey}
-                  onPress={() => this.addBooking()}>
-                  <Text style={styles.buttonText}>{ bookingKey ? "Booked" : "Add Booking"}</Text>
+                  disabled={feedbackKey}
+                  onPress={() => this.feedBack()}>
+                  <Text style={styles.buttonText}>{ feedbackKey ? "FeedBack Already" : "FeedBack"}</Text>
                 </TouchableOpacity>
               </View>
 
               <View style={{marginVertical: 10}}>
                 <TouchableOpacity
                   style={styles.button}
-                  disabled={feedbackKey}
-                  onPress={() => this.feedBack()}>
-                  <Text style={styles.buttonText}>{ feedbackKey ? "FeedBack Already" : "FeedBack"}</Text>
+                  onPress={() => this.locationView()}>
+                  <Text style={styles.buttonText}>View Location Areas </Text>
                 </TouchableOpacity>
               </View>
 

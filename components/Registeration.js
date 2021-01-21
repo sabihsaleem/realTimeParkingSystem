@@ -71,13 +71,6 @@ export default class Registeration extends React.Component {
             isAdmin: false,
             })
             .then(() => {
-            this.setState({
-                name: '',
-                password: '',
-                email: '',
-                address: '',
-                contactNo: '',
-            });
             console.log('Data update.');
             alert('Data update.');
             })

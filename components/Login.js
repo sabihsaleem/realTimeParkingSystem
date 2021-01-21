@@ -143,11 +143,11 @@ export default class Login extends React.Component {
 
   render() {
       const { userList, email, password } = this.state
-      console.log(userList,'userList')
+      // console.log(userList,'userList')
     return (
         <View style={styles.main}>
         {this.state.isLoading ?
-        <>
+        <KeyboardAwareScrollView>
 
             <View style={styles.container}>
                 <TouchableOpacity
@@ -206,7 +206,7 @@ export default class Login extends React.Component {
                     </Text>
               </TouchableOpacity>
             </View>
-        </>
+        </KeyboardAwareScrollView>
             :
             <View>
                 <Text> Failed </Text>

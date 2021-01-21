@@ -30,6 +30,8 @@ export default class Profile extends React.Component {
       isLoading: true,
       currentUser:[],
       currentUserKey:'',
+      readMore: false,
+      data: [],
     };
   }
   componentDidMount = () => {
@@ -39,20 +41,20 @@ export default class Profile extends React.Component {
       .database()
       .ref('User')
       .on('value', (snapshot) => {
-        console.log("Profilesnapshot.val()", snapshot.val())
+        // console.log("Profilesnapshot.val()", snapshot.val())
         const getValue = snapshot.val();
-        console.log("ProfilegetValue", getValue)
+        // console.log("ProfilegetValue", getValue)
         let array = [];
         for (let key in getValue) {
           // console.log("key", key)
           const value = {...getValue[key], key};
           array.push(value);
         }
-        console.log(array, 'Profilearray');
+        // console.log(array, 'Profilearray');
         const currentUser = array.filter(
           (el) => el.email.toLowerCase() === user.email.toLowerCase(),
         );
-        console.log('currentUserProfile', currentUser);
+        // console.log('currentUserProfile', currentUser);
         this.setState({
           currentUser,
           currentUserKey:currentUser[0].key,
@@ -62,6 +64,51 @@ export default class Profile extends React.Component {
           contactNo:currentUser[0].contactNo,
         });
       });
+    firebase
+    .database()
+    .ref('Location')
+    .on('value', (snapshot) => {
+      // console.log("Location.val()", snapshot.val())
+      const getValue = snapshot.val();
+      // console.log("Location", getValue)
+      let arrayLocation = [];
+      for (let keyLocation in getValue) {
+        const value = {...getValue[keyLocation], keyLocation};
+        arrayLocation.push(value);
+      }
+      console.log(arrayLocation, 'arrayLocation');
+      let data = []
+      for(let keydata of arrayLocation){
+        // console.log('keydata',keydata)
+        if(keydata.Slots){
+          let slots = keydata.Slots
+          // console.log('keydata.Slots',slots)
+          for(let keydataSlots in slots){
+            // console.log('keydata.Slots[keydataSlots]',slots[keydataSlots],keydataSlots)
+            if(slots[keydataSlots].bookedUsers){
+              let bookedUsers = slots[keydataSlots].bookedUsers
+              // console.log('keydata.Slots[keydataSlots].bookedUsers',bookedUsers)
+              for(let key in bookedUsers){
+                console.log('bookedUsers[key]',bookedUsers[key])
+                if(bookedUsers[key].email.toLowerCase()===user.email.toLowerCase()){
+                  console.log('true')
+                  const value = {...bookedUsers[key], key};
+                  data.push(value)
+                }else{
+                  console.log('false')
+                }
+                // const cUser = bookedUsers[key].filter(
+                //   (el) => el.email.toLowerCase() === user.email.toLowerCase()
+                // )
+                // console.log('cUser', cUser);
+              }
+            }
+          }
+        }
+      }
+      console.log('data',data)
+      this.setState({data})
+    });
   };
 
   emptyComponent = () => {
@@ -129,9 +176,13 @@ export default class Profile extends React.Component {
       });
   }
 
+  Read = () => {
+    this.setState({readMore: !this.state.readMore});
+  };
+
   render() {
-    const {currentUser,name,email,address,contactNo} = this.state
-    console.log("email",email,name,contactNo,address)
+    const {currentUser,name,email,address,contactNo,readMore,data} = this.state
+    // console.log("email",email,name,contactNo,address)
     return (
       <View
         style={styles.main}>
@@ -187,7 +238,161 @@ export default class Profile extends React.Component {
                           {item.address}
                         </Text>
                       </View>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          marginHorizontal: 10,
+                          marginVertical: 5,
 
+                        }}>
+                        <TouchableOpacity
+                          style={{
+                            width: wp('85%'),
+                          }}
+                          onPress={() => this.Read()}>
+                          <Text
+                            style={{
+                              marginVertical: 3,
+                              marginHorizontal: 10,
+                              // fontWeight: 'bold',
+                              color: 'white',
+                              fontSize: 16,
+                              alignSelf:'center',
+                              borderColor: '#67bae3',
+                              borderWidth:0.5,
+                              padding:5
+                            }}>
+                            View Current Booked Slot
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      {readMore && (
+                        <View>
+                          <FlatList
+                            // style={styles.list}
+                            data={data}
+                            ListEmptyComponent={() => this.emptyComponent()}
+                            renderItem={({item, index}) => (
+                              <View
+                                style={{
+                                  marginVertical: 5,
+                                  width: '95%',
+                                  backgroundColor: '#e06100',
+                                }}>
+                                <View style={{marginVertical: 5}}>
+                                  <View
+                                    style={{justifyContent: 'space-between'}}>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 20,
+                                        fontWeight: 'bold',
+                                      }}>
+                                      Vehicle Name:
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 18,
+                                      }}>
+                                      {item.vehicleName}
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 20,
+                                        fontWeight: 'bold',
+                                      }}>
+                                      Vehicle Type:
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 18,
+                                      }}>
+                                      {item.vehicleType}
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 20,
+                                        fontWeight: 'bold',
+                                      }}>
+                                      Current Date:
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 18,
+                                      }}>
+                                      {item.currentDate}
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 20,
+                                        fontWeight: 'bold',
+                                      }}>
+                                      Location Area Name:
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 18,
+                                      }}>
+                                      {item.locationType}
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 20,
+                                        fontWeight: 'bold',
+                                      }}>
+                                      Start Time:
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 18,
+                                      }}>
+                                      {item.startTime.slice(10,19)}
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 20,
+                                        fontWeight: 'bold',
+                                      }}>
+                                      End time:
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 20,
+                                        color: 'black',
+                                        fontSize: 18,
+                                      }}>
+                                      {item.endTime.slice(10,19)}
+                                    </Text>
+                                  </View>
+                                </View>
+                              </View>
+                            )}
+                            keyExtractor={(item, index) => `${index}`}
+                          />
+                        </View>
+                      )}
                     </View>
                   </View>
                 )}

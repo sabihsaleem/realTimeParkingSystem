@@ -19,37 +19,28 @@ import {
 } from 'react-native-responsive-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default class viewUsersList extends React.Component {
+export default class viewSlotsList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoading: true,
-      viewUsersListNonAdmin:[],
+      SlotsList:[],
     };
   }
 
   componentDidMount = () => {
-    const user = auth().currentUser;
-    console.log('user', user);
-    firebase
-      .database()
-      .ref('User')
-      .on('value', (snapshot) => {
-        console.log("viewUsersList.val()", snapshot.val())
-        const getValue = snapshot.val();
-        console.log("viewUsersListgetValue", getValue)
-        let viewUsersList = [];
-        for (let key in getValue) {
-          // console.log("key", key)
-          const value = {...getValue[key], key};
-          viewUsersList.push(value);
-        }
-        console.log(viewUsersList, 'viewUsersList');
-        const viewUsersListNonAdmin = viewUsersList.filter(el => el.isAdmin === false)
-        this.setState({
-            viewUsersListNonAdmin,
-        });
-      });
+    console.log("this.props.route.params.item.Slots",this.props.route.params.item.Slots)
+    let slots = this.props.route.params.item.Slots
+    let SlotsList = [];
+    for (let keySlot in slots) {
+        // console.log("key", key)
+        const value = {...slots[keySlot], keySlot};
+        SlotsList.unshift(value);
+    }
+    console.log(SlotsList, 'SlotsList');
+    this.setState({
+        SlotsList,
+    });
   };
 
   emptyComponent = () => {
@@ -83,21 +74,20 @@ export default class viewUsersList extends React.Component {
     );
   };
 
-  feeddbackList(index,item) {
-    this.props.navigation.navigate('viewFeedBackList',{
-      item,
-    })
+  viewBookedUsersList(item,index) {
+    this.props.navigation.navigate('viewBookedUsersList',{
+        item,
+    });
   }
 
   delete(index,item) {
-    let deleted = 'User/' + item.key
+    let deleted = 'bookedUsers/' + item.key
     console.log("delete",deleted)
     firebase.database().ref(deleted).remove();
   }
 
   render() {
-    const {viewUsersListNonAdmin} = this.state
-    // console.log("viewUsersListNonAdmin",viewUsersListNonAdmin)
+    const {SlotsList} = this.state
     return (
       <View
         style={styles.main}>
@@ -115,13 +105,13 @@ export default class viewUsersList extends React.Component {
                   />
               </TouchableOpacity>
               <Text style={styles.containerTextHeader}>
-                Users List
+                Slots List
               </Text>
             </View>
             <View style={styles.container1}>
               <FlatList
                 style={styles.list}
-                data={viewUsersListNonAdmin}
+                data={SlotsList}
                 ListEmptyComponent={() => this.emptyComponent()}
                 renderItem={({item, index}) => (
                   <View
@@ -130,49 +120,39 @@ export default class viewUsersList extends React.Component {
                     
                       <View style={{justifyContent: 'space-between'}}>
                         <Text
-                          style={styles.flatListNameText}>
-                          {item.name.toUpperCase()}
+                          style={styles.flatListnoFSLotsText}>
+                          {item.noFSLots.toUpperCase()}
+                        </Text>                       
+                        <Text
+                            style={styles.flatListText}>
+                            {item.locationName}
                         </Text>
-                        <View
-                          style={styles.flatListEmailContactNoView}>
-                          <View>
-                            <Text
-                              style={styles.flatListText}>
-                              {item.email}
-                            </Text>
-                          </View>
-                          <View>
-                            <Text
-                              style={styles.flatListText}>
-                              {item.contactNo}
-                            </Text>
-                          </View>
-                        </View>
                         <Text
                           style={styles.flatListText}>
-                          {item.address}
+                          {item.locationAddress}
+                        </Text>
+                        <Text
+                          style={styles.flatListText}>
+                          {item.locationContactNo}
                         </Text>
                       </View>
                       <View style={styles.flatListContainer}>
                         <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => this.feeddbackList(index,item)}
-                        >
-                            <Text style={styles.buttonText}>
-                                Feedback List
-                            </Text>
+                        style={styles.button}
+                        onPress={() => this.viewBookedUsersList(item,index)}>
+                        <Text style={styles.buttonText}> Slot List</Text>
                         </TouchableOpacity>
                       </View>
-                      <View style={styles.flatListContainer}>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => this.delete(index,item)}
-                        >
-                            <Text style={styles.buttonText}>
-                                Delete
-                            </Text>
-                        </TouchableOpacity>
-                      </View>
+                        <View style={styles.flatListContainer}>
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => this.delete(index,item)}
+                            >
+                                <Text style={styles.buttonText}>
+                                    Delete
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                   </View>
                 )}
@@ -201,6 +181,7 @@ const styles = StyleSheet.create({
   container: {
     borderWidth:1,
     flexDirection:'row',
+    width: wp('100%'),
   },
   image: {
     marginVertical: 5,
@@ -212,17 +193,12 @@ const styles = StyleSheet.create({
     fontSize:28,
     fontWeight:'bold',
     alignSelf:'center',
-    marginHorizontal:90
-  },
-  container1TextHeader:{
-    fontSize:28,
-    fontWeight:'bold',
-    alignSelf:'center',
-    marginHorizontal:90
+    marginHorizontal:100,
+    width: wp('100%')
   },
   //container1 View
   container1: {
-    // height: hp('100%'),
+    // height: hp('75%'),
   },
   list: {
     width: wp('100%'),
@@ -236,18 +212,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#e06100',
     borderColor: '#67bae3',
   },
-  flatListNameText: {
+  flatListnoFSLotsText: {
     paddingHorizontal: 20,
     color: 'black',
     fontSize: 22,
     fontWeight: 'bold',
     alignSelf: 'center',
-  },
-  flatListEmailContactNoView: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    marginVertical: 5,
-    borderWidth: 0.5,
   },
   flatListText: {
     paddingHorizontal: 20,

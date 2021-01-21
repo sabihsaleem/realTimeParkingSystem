@@ -24,30 +24,23 @@ export default class viewBookedUsersList extends React.Component {
     super(props);
     this.state = {
       isLoading: true,
-      viewBookedUsersList:[],
+      bookedUsersList:[],
     };
   }
+
   componentDidMount = () => {
-    const user = auth().currentUser;
-    console.log('user', user);
-    firebase
-      .database()
-      .ref('bookedUsers')
-      .on('value', (snapshot) => {
-        console.log("viewBookedUsersList.val()", snapshot.val())
-        const getValue = snapshot.val();
-        console.log("viewBookedUsersListgetValue", getValue)
-        let viewBookedUsersList = [];
-        for (let key in getValue) {
-          // console.log("key", key)
-          const value = {...getValue[key], key};
-          viewBookedUsersList.push(value);
-        }
-        console.log(viewBookedUsersList, 'viewBookedUsersList');
-        this.setState({
-            viewBookedUsersList,
-        });
-      });
+    console.log("this.props.route.params.item.bookedUsers",this.props.route.params.item.bookedUsers)
+    let bookedUsers = this.props.route.params.item.bookedUsers
+    let bookedUsersList = [];
+    for (let keybookedUsers in bookedUsers) {
+        const value = {...bookedUsers[keybookedUsers], keybookedUsers};
+        bookedUsersList.push(value);
+    }
+    console.log(bookedUsersList, 'bookedUsersList');
+    this.setState({
+        bookedUsersList,
+    });
+
   };
 
   emptyComponent = () => {
@@ -81,9 +74,14 @@ export default class viewBookedUsersList extends React.Component {
     );
   };
 
+  delete(index,item) {
+    let deleted = 'bookedUsers/' + item.key
+    console.log("delete",deleted)
+    firebase.database().ref(deleted).remove();
+  }
+
   render() {
-    const {viewBookedUsersList} = this.state
-    console.log("viewBookedUsersList",viewBookedUsersList)
+    const {bookedUsersList} = this.state
     return (
       <View
         style={styles.main}>
@@ -107,7 +105,7 @@ export default class viewBookedUsersList extends React.Component {
             <View style={styles.container1}>
               <FlatList
                 style={styles.list}
-                data={viewBookedUsersList}
+                data={bookedUsersList}
                 ListEmptyComponent={() => this.emptyComponent()}
                 renderItem={({item, index}) => (
                   <View
@@ -119,31 +117,45 @@ export default class viewBookedUsersList extends React.Component {
                           style={styles.flatListNameText}>
                           {item.name}
                         </Text>
-                        <View
-                          style={styles.flatListEmailTimeView}>
-                          <View>
-                            <Text
-                              style={styles.flatListEmailText}>
-                              {item.email}
-                            </Text>
-                          </View>
-                          <View>
-                            <Text
-                              style={styles.flatListTimeText}>
-                              {item.time}
-                            </Text>
-                          </View>
-                        </View>
+                          <Text
+                            style={styles.flatListText}>
+                            {item.email}
+                          </Text>
+                          <Text
+                            style={styles.flatListText}>
+                            {item.startTime.slice(12,19)}
+                          </Text>
+                          <Text
+                            style={styles.flatListText}>
+                            {item.endTime.slice(12,19)}
+                          </Text>
                         <Text
-                          style={styles.flatListVehicleName}>
+                          style={styles.flatListText}>
                           {item.vehicleName}
                         </Text>
                         <Text
-                          style={styles.flatListVehicleType}>
+                          style={styles.flatListText}>
                           {item.vehicleType}
                         </Text>
+                        <Text
+                            style={styles.flatListText}>
+                            {item.locationType}
+                        </Text>
+                        <Text
+                            style={styles.flatListText}>
+                            {item.currentDate}
+                        </Text>
                       </View>
-
+                      <View style={styles.flatListContainer}>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => this.delete(index,item)}
+                        >
+                            <Text style={styles.buttonText}>
+                                Delete
+                            </Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 )}
@@ -187,15 +199,9 @@ const styles = StyleSheet.create({
     marginHorizontal:40,
     width: wp('100%')
   },
-  container1TextHeader:{
-    fontSize:28,
-    fontWeight:'bold',
-    alignSelf:'center',
-    marginHorizontal:90
-  },
   //container1 View
   container1: {
-    height: hp('75%'),
+    // height: hp('75%'),
   },
   list: {
     width: wp('100%'),
@@ -222,65 +228,32 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderWidth: 0.5,
   },
-  flatListEmailText: {
+  flatListText: {
     paddingHorizontal: 20,
     color: 'black',
     fontSize: 18,
   },
-  flatListTimeText: {
-    paddingHorizontal: 20,
-    color: 'black',
-    fontSize: 18,
-  },
-  flatListVehicleName: {
-    paddingHorizontal: 20,
-    color: 'black',
-    fontSize: 18,
-  },
-  flatListVehicleType: {
-    paddingHorizontal: 20,
-    color: 'black',
-    fontSize: 18,
-  },
-  //container2 View
-  container2: {
-    marginTop: 'auto',
-    alignItems:'center',
+  flatListContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 5,
   },
   button: {
-    marginVertical:10,
-    borderWidth:2,
-    borderRadius:10,
-    borderColor:'#67bae3',
-    backgroundColor: '#f39c12',
-    width: wp('96%'),
-    height:hp('10%'),
-    alignItems:'center',
-    justifyContent:'center',
+    backgroundColor:'#f39c12',
+    borderRadius: 10,
+    marginVertical: 5,
+    marginHorizontal: 10,
+    alignItems: 'center',
+    width: wp('85%'),
+    height: 40,
+    justifyContent: 'center',
+    borderColor: 'white',
+    borderWidth: 2,
   },
   buttonText: {
     fontWeight: 'bold',
     color: 'white',
     fontSize: 24,
-  },
-  //container3 View
-  container3: {
-    height: hp('72%'),
-    // backgroundColor:'blue',
-  },
-  textContainer3:{
-    marginHorizontal:10,
-    marginVertical:10,
-    fontSize:18,
-    fontWeight:'bold',
-    color:'white'
-  },
-  textInputContainer3:{
-    marginHorizontal:10,
-    width: wp('96%'),
-    borderWidth:2,
-    borderColor:'#67bae3',
-    paddingHorizontal:10,
-    color:'white',
   },
 });

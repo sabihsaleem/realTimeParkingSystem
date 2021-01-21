@@ -14,6 +14,12 @@ import FeedBack from './components/FeedBack/FeedBack';
 import viewUsersList from './components/List/viewUsersList';
 import viewBookedUsersList from './components/List/viewBookedUsersList';
 import viewFeedBackList from './components/List/viewFeedBackList';
+import Location from './components/Location/Location';
+import viewLocation from './components/List/viewLocation';
+import addSlots from './components/Location/addSlots';
+import viewSlots from './components/List/viewSlots';
+import checkLocation from './components/Location/checkLocation';
+import viewSlotsList from './components/List/viewSlotsLists';
 
 const Stack = createStackNavigator();
 
@@ -31,6 +37,12 @@ export default function Routes() {
             <Stack.Screen name="viewUsersList" component={viewUsersList} />
             <Stack.Screen name="viewBookedUsersList" component={viewBookedUsersList} />
             <Stack.Screen name="viewFeedBackList" component={viewFeedBackList} />
+            <Stack.Screen name="Location" component={Location} />
+            <Stack.Screen name="LocationView" component={viewLocation} />
+            <Stack.Screen name="ADDSlots" component={addSlots} />
+            <Stack.Screen name="ViewSlots" component={viewSlots} />
+            <Stack.Screen name="checkLocation" component={checkLocation} />
+            <Stack.Screen name="SlotsList" component={viewSlotsList} />
         </Stack.Navigator>
     );
 }

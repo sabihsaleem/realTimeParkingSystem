@@ -19,37 +19,75 @@ import {
 } from 'react-native-responsive-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default class viewUsersList extends React.Component {
+export default class viewSlots extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoading: true,
-      viewUsersListNonAdmin:[],
+      viewSlotsData: [],
+      bookingKey: null,
+      BookingKey:null,
+      key:'',
     };
   }
 
   componentDidMount = () => {
+    // console.log('user', this.props.route.params.item.Slots);
+    // console.log('this.props.route.params.item.key', this.props.route.params.item.key);
+    let sloted = this.props.route.params.item.Slots
+    let viewSlotsData = [];
+    for(let key in sloted ){
+        const value = {...sloted[key],key}
+        viewSlotsData.push(value);
+    }
+    // console.log(viewSlotsData, 'viewSlotsData');
+    this.setState({
+        viewSlotsData,
+    });
     const user = auth().currentUser;
     console.log('user', user);
     firebase
       .database()
       .ref('User')
       .on('value', (snapshot) => {
-        console.log("viewUsersList.val()", snapshot.val())
+        // console.log("snapshot.val()", snapshot.val())
         const getValue = snapshot.val();
-        console.log("viewUsersListgetValue", getValue)
-        let viewUsersList = [];
+        // console.log("getValue", getValue)
+        let array = [];
         for (let key in getValue) {
           // console.log("key", key)
           const value = {...getValue[key], key};
-          viewUsersList.push(value);
+          array.push(value);
         }
-        console.log(viewUsersList, 'viewUsersList');
-        const viewUsersListNonAdmin = viewUsersList.filter(el => el.isAdmin === false)
-        this.setState({
-            viewUsersListNonAdmin,
-        });
-      });
+        // console.log(array, 'array');
+        const currentUser = array.filter(
+          (el) => el.email.toLowerCase() === user.email.toLowerCase(),
+        );
+        console.log('currentUser', currentUser);
+        console.log('currentUser[0].key', currentUser[0].key);
+        let BookingValue = currentUser[0].Booking
+        if(BookingValue===undefined){
+          this.setState({
+              name: currentUser[0].name,
+              BookingKey: null,
+              key: currentUser[0].key,
+          });
+        }else{
+          let BookingData = []
+          for(let BookingKey in BookingValue){
+              const value = {...BookingValue[BookingKey],BookingKey}
+              BookingData.push(value)
+          }
+          // console.log("BookingData",BookingData)
+          // console.log("BookingData[0].BookingKey",BookingData[0].BookingKey)
+
+          this.setState({
+              name: currentUser[0].name,
+              BookingKey: BookingData[0].BookingKey,
+              key: currentUser[0].key,
+          });
+        }
+    });
   };
 
   emptyComponent = () => {
@@ -83,21 +121,29 @@ export default class viewUsersList extends React.Component {
     );
   };
 
-  feeddbackList(index,item) {
-    this.props.navigation.navigate('viewFeedBackList',{
-      item,
-    })
+  addBooking(index,item) {
+    { 
+        item.bookedUsers ? 
+        alert('You already booked in this Location')
+        : 
+        this.props.navigation.navigate('ADDBooking',{
+            item,
+            locationKey:this.props.route.params.item.key
+        }) 
+            
+    }
   }
 
-  delete(index,item) {
-    let deleted = 'User/' + item.key
+  cancelBooking(index,item) {
+    let deleted = item.key
     console.log("delete",deleted)
-    firebase.database().ref(deleted).remove();
+    // firebase.database().ref(deleted).remove();
   }
 
   render() {
-    const {viewUsersListNonAdmin} = this.state
-    // console.log("viewUsersListNonAdmin",viewUsersListNonAdmin)
+    const {viewSlotsData,bookingKey,BookingKey,key} = this.state
+    console.log('key',key)
+    viewSlotsData.sort((a, b) => { return a.noFSLots - b.noFSLots; })
     return (
       <View
         style={styles.main}>
@@ -115,15 +161,16 @@ export default class viewUsersList extends React.Component {
                   />
               </TouchableOpacity>
               <Text style={styles.containerTextHeader}>
-                Users List
+                Available Slots
               </Text>
             </View>
             <View style={styles.container1}>
               <FlatList
                 style={styles.list}
-                data={viewUsersListNonAdmin}
+                data={viewSlotsData}
                 ListEmptyComponent={() => this.emptyComponent()}
                 renderItem={({item, index}) => (
+                    // console.log("flateList", item.bookedUsers),
                   <View
                     style={styles.container1FlatlistView}>
                     <View style={{marginVertical: 5}}>
@@ -131,48 +178,67 @@ export default class viewUsersList extends React.Component {
                       <View style={{justifyContent: 'space-between'}}>
                         <Text
                           style={styles.flatListNameText}>
-                          {item.name.toUpperCase()}
+                          {item.noFSLots.toUpperCase()}
                         </Text>
-                        <View
-                          style={styles.flatListEmailContactNoView}>
-                          <View>
-                            <Text
-                              style={styles.flatListText}>
-                              {item.email}
-                            </Text>
-                          </View>
-                          <View>
-                            <Text
-                              style={styles.flatListText}>
-                              {item.contactNo}
-                            </Text>
-                          </View>
-                        </View>
+                        <Text
+                            style={styles.flatListText}>
+                            {item.locationName}
+                        </Text>
                         <Text
                           style={styles.flatListText}>
-                          {item.address}
+                          {item.locationAddress}
+                        </Text>
+                        <Text
+                          style={styles.flatListText}>
+                          {item.locationContactNo}
                         </Text>
                       </View>
                       <View style={styles.flatListContainer}>
                         <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => this.feeddbackList(index,item)}
+                            style={{
+                                backgroundColor: item.bookedUsers ? 'red' : '#f39c12' ,
+                                borderRadius: 10,
+                                marginVertical: 5,
+                                marginHorizontal: 10,
+                                alignItems: 'center',
+                                width: wp('85%'),
+                                height: 40,
+                                justifyContent: 'center',
+                                borderColor: 'white',
+                                borderWidth: 2,
+                            }}
+                            onPress={() => this.addBooking(index,item)}
+                            disabled={item.bookedUsers}
                         >
                             <Text style={styles.buttonText}>
-                                Feedback List
+                                {  item.bookedUsers ? "Booked" : "Add Booking"}
                             </Text>
                         </TouchableOpacity>
                       </View>
-                      <View style={styles.flatListContainer}>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => this.delete(index,item)}
-                        >
-                            <Text style={styles.buttonText}>
-                                Delete
-                            </Text>
-                        </TouchableOpacity>
-                      </View>
+                      {(key) ?
+                        <View style={styles.flatListContainer}>
+                          <TouchableOpacity
+                              style={{
+                                  borderRadius: 10,
+                                  marginVertical: 5,
+                                  marginHorizontal: 10,
+                                  alignItems: 'center',
+                                  width: wp('85%'),
+                                  height: 40,
+                                  justifyContent: 'center',
+                                  borderColor: 'white',
+                                  borderWidth: 2,
+                              }}
+                              onPress={() => this.cancelBooking(index,item)}
+                          >
+                              <Text style={styles.buttonText}>
+                                  Cancel
+                              </Text>
+                          </TouchableOpacity>
+                        </View>
+                        :
+                        null
+                      }
                     </View>
                   </View>
                 )}
@@ -212,13 +278,7 @@ const styles = StyleSheet.create({
     fontSize:28,
     fontWeight:'bold',
     alignSelf:'center',
-    marginHorizontal:90
-  },
-  container1TextHeader:{
-    fontSize:28,
-    fontWeight:'bold',
-    alignSelf:'center',
-    marginHorizontal:90
+    marginHorizontal:70
   },
   //container1 View
   container1: {

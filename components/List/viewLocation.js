@@ -19,12 +19,12 @@ import {
 } from 'react-native-responsive-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default class viewUsersList extends React.Component {
+export default class viewLocation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoading: true,
-      viewUsersListNonAdmin:[],
+      viewLocationData:[],
     };
   }
 
@@ -33,21 +33,20 @@ export default class viewUsersList extends React.Component {
     console.log('user', user);
     firebase
       .database()
-      .ref('User')
+      .ref('Location')
       .on('value', (snapshot) => {
-        console.log("viewUsersList.val()", snapshot.val())
+        console.log("viewLocation.val()", snapshot.val())
         const getValue = snapshot.val();
-        console.log("viewUsersListgetValue", getValue)
-        let viewUsersList = [];
+        console.log("viewLocationValue", getValue)
+        let viewLocationData = [];
         for (let key in getValue) {
           // console.log("key", key)
           const value = {...getValue[key], key};
-          viewUsersList.push(value);
+          viewLocationData.unshift(value);
         }
-        console.log(viewUsersList, 'viewUsersList');
-        const viewUsersListNonAdmin = viewUsersList.filter(el => el.isAdmin === false)
+        console.log(viewLocationData, 'viewLocationData');
         this.setState({
-            viewUsersListNonAdmin,
+            viewLocationData,
         });
       });
   };
@@ -83,27 +82,32 @@ export default class viewUsersList extends React.Component {
     );
   };
 
-  feeddbackList(index,item) {
-    this.props.navigation.navigate('viewFeedBackList',{
-      item,
+  addSlots(index,item) {
+    this.props.navigation.navigate('ADDSlots',{
+        item,
+    })
+  }
+
+  viewSlots(index,item) {
+    this.props.navigation.navigate('SlotsList',{
+        item,
     })
   }
 
   delete(index,item) {
-    let deleted = 'User/' + item.key
+    let deleted = 'Location/' + item.key
     console.log("delete",deleted)
     firebase.database().ref(deleted).remove();
   }
 
   render() {
-    const {viewUsersListNonAdmin} = this.state
-    // console.log("viewUsersListNonAdmin",viewUsersListNonAdmin)
+    const {viewLocationData,userKey} = this.state
     return (
       <View
         style={styles.main}>
         {this.state.isLoading ? (
-          <ScrollView>
-            <View style={styles.container}>
+        <>
+          <View style={styles.container}>
               <TouchableOpacity
                 onPress={() => {
                   this.props.navigation.goBack();
@@ -115,13 +119,14 @@ export default class viewUsersList extends React.Component {
                   />
               </TouchableOpacity>
               <Text style={styles.containerTextHeader}>
-                Users List
+              Location Areas List
               </Text>
             </View>
+          <ScrollView>
             <View style={styles.container1}>
               <FlatList
                 style={styles.list}
-                data={viewUsersListNonAdmin}
+                data={viewLocationData}
                 ListEmptyComponent={() => this.emptyComponent()}
                 renderItem={({item, index}) => (
                   <View
@@ -131,48 +136,62 @@ export default class viewUsersList extends React.Component {
                       <View style={{justifyContent: 'space-between'}}>
                         <Text
                           style={styles.flatListNameText}>
-                          {item.name.toUpperCase()}
+                          {item.locationName.toUpperCase()}
                         </Text>
                         <View
                           style={styles.flatListEmailContactNoView}>
                           <View>
                             <Text
                               style={styles.flatListText}>
-                              {item.email}
+                              {item.locationDetails}
                             </Text>
                           </View>
                           <View>
                             <Text
                               style={styles.flatListText}>
-                              {item.contactNo}
+                              {item.noFSlots}
                             </Text>
                           </View>
                         </View>
                         <Text
                           style={styles.flatListText}>
-                          {item.address}
+                          {item.locationAddress}
+                        </Text>
+                        <Text
+                          style={styles.flatListText}>
+                          {item.locationContactNo}
                         </Text>
                       </View>
                       <View style={styles.flatListContainer}>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => this.feeddbackList(index,item)}
+                            onPress={() => this.addSlots(index,item)}
                         >
                             <Text style={styles.buttonText}>
-                                Feedback List
+                                Add Slots
                             </Text>
                         </TouchableOpacity>
                       </View>
                       <View style={styles.flatListContainer}>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => this.delete(index,item)}
+                            onPress={() => this.viewSlots(index,item)}
                         >
                             <Text style={styles.buttonText}>
-                                Delete
+                                View Slots
                             </Text>
                         </TouchableOpacity>
                       </View>
+                        <View style={styles.flatListContainer}>
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => this.delete(index,item)}
+                            >
+                                <Text style={styles.buttonText}>
+                                    Delete
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                   </View>
                 )}
@@ -180,6 +199,7 @@ export default class viewUsersList extends React.Component {
               />
             </View>
           </ScrollView>
+        </>
         ) : (
           <View>
             <Text>Welcome</Text>
@@ -212,7 +232,7 @@ const styles = StyleSheet.create({
     fontSize:28,
     fontWeight:'bold',
     alignSelf:'center',
-    marginHorizontal:90
+    marginHorizontal:50
   },
   container1TextHeader:{
     fontSize:28,
