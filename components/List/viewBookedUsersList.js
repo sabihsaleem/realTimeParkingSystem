@@ -3,21 +3,18 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   FlatList,
   StyleSheet,
   ScrollView,
   Image,
   Alert,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import auth from '@react-native-firebase/auth';
 import {firebase} from '@react-native-firebase/database';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class viewBookedUsersList extends React.Component {
   constructor(props) {
@@ -29,14 +26,14 @@ export default class viewBookedUsersList extends React.Component {
   }
 
   componentDidMount = () => {
-    console.log("this.props.route.params.item.bookedUsers",this.props.route.params.item.bookedUsers)
+
     let bookedUsers = this.props.route.params.item.bookedUsers
     let bookedUsersList = [];
-    for (let keybookedUsers in bookedUsers) {
+    for ( let keybookedUsers in bookedUsers ) {
         const value = {...bookedUsers[keybookedUsers], keybookedUsers};
         bookedUsersList.push(value);
     }
-    console.log(bookedUsersList, 'bookedUsersList');
+
     this.setState({
         bookedUsersList,
     });
@@ -44,10 +41,6 @@ export default class viewBookedUsersList extends React.Component {
   };
 
   emptyComponent = () => {
-    // if(this.state.list.length===null){
-    //   this.props.navigation.goBack();
-
-    // }
     return (
       <View
         style={{
@@ -57,7 +50,7 @@ export default class viewBookedUsersList extends React.Component {
           width: wp('100%'),
           height: hp('100%'),
         }}>
-        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+        <TouchableOpacity onPress={ () => this.props.navigation.goBack() }>
           <View>
             <Text
               style={{
@@ -75,7 +68,9 @@ export default class viewBookedUsersList extends React.Component {
   };
 
   delete(index,item) {
-    let deleted = 'bookedUsers/' + item.key
+    let locationKey = this.props.route.params.locationKey
+    let slotKey = this.props.route.params.item.keySlot
+    let deleted = 'Location/' + locationKey + '/Slots/' + slotKey + '/bookedUsers/' + item.UserKey
     console.log("delete",deleted)
     firebase.database().ref(deleted).remove();
   }

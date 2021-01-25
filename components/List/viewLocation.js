@@ -3,59 +3,49 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   FlatList,
   StyleSheet,
   ScrollView,
   Image,
-  Alert,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import auth from '@react-native-firebase/auth';
 import {firebase} from '@react-native-firebase/database';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class viewLocation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoading: true,
-      viewLocationData:[],
+      viewLocationData: [],
     };
   }
 
   componentDidMount = () => {
-    const user = auth().currentUser;
-    console.log('user', user);
     firebase
       .database()
       .ref('Location')
       .on('value', (snapshot) => {
-        console.log("viewLocation.val()", snapshot.val())
+
         const getValue = snapshot.val();
-        console.log("viewLocationValue", getValue)
+
         let viewLocationData = [];
         for (let key in getValue) {
-          // console.log("key", key)
           const value = {...getValue[key], key};
           viewLocationData.unshift(value);
         }
-        console.log(viewLocationData, 'viewLocationData');
+
         this.setState({
-            viewLocationData,
+          viewLocationData,
         });
+
       });
   };
 
   emptyComponent = () => {
-    // if(this.state.list.length===null){
-    //   this.props.navigation.goBack();
-
-    // }
     return (
       <View
         style={{
@@ -82,124 +72,105 @@ export default class viewLocation extends React.Component {
     );
   };
 
-  addSlots(index,item) {
-    this.props.navigation.navigate('ADDSlots',{
-        item,
-    })
+  addSlots (index, item) {
+    this.props.navigation.navigate('ADDSlots', {
+      item,
+    });
   }
 
-  viewSlots(index,item) {
-    this.props.navigation.navigate('SlotsList',{
-        item,
-    })
+  viewSlots (index, item) {
+    this.props.navigation.navigate('SlotsList', {
+      item,
+    });
   }
 
-  delete(index,item) {
-    let deleted = 'Location/' + item.key
-    console.log("delete",deleted)
+  delete (index, item) {
+    let deleted = 'Location/' + item.key;
+    console.log('delete', deleted);
     firebase.database().ref(deleted).remove();
   }
 
   render() {
-    const {viewLocationData,userKey} = this.state
+    const {viewLocationData, userKey} = this.state;
     return (
-      <View
-        style={styles.main}>
+      <View style={styles.main}>
         {this.state.isLoading ? (
-        <>
-          <View style={styles.container}>
+          <>
+            <View style={styles.container}>
               <TouchableOpacity
                 onPress={() => {
                   this.props.navigation.goBack();
-                }}
-                >
-                  <Image
-                    style={styles.image}
-                    source={require('../../back-button-icon-png-25.jpg')}
-                  />
+                }}>
+                <Image
+                  style={styles.image}
+                  source={require('../../back-button-icon-png-25.jpg')}
+                />
               </TouchableOpacity>
               <Text style={styles.containerTextHeader}>
-              Location Areas List
+                Location Areas List
               </Text>
             </View>
-          <ScrollView>
-            <View style={styles.container1}>
-              <FlatList
-                style={styles.list}
-                data={viewLocationData}
-                ListEmptyComponent={() => this.emptyComponent()}
-                renderItem={({item, index}) => (
-                  <View
-                    style={styles.container1FlatlistView}>
-                    <View style={{marginVertical: 5}}>
-                    
-                      <View style={{justifyContent: 'space-between'}}>
-                        <Text
-                          style={styles.flatListNameText}>
-                          {item.locationName.toUpperCase()}
-                        </Text>
-                        <View
-                          style={styles.flatListEmailContactNoView}>
-                          <View>
-                            <Text
-                              style={styles.flatListText}>
-                              {item.locationDetails}
-                            </Text>
+            <ScrollView>
+              <View style={styles.container1}>
+                <FlatList
+                  style={styles.list}
+                  data={viewLocationData}
+                  ListEmptyComponent={() => this.emptyComponent()}
+                  renderItem={({item, index}) => (
+                    <View style={styles.container1FlatlistView}>
+                      <View style={{marginVertical: 5}}>
+                        <View style={{justifyContent: 'space-between'}}>
+                          <Text style={styles.flatListNameText}>
+                            {item.locationName.toUpperCase()}
+                          </Text>
+                          <View style={styles.flatListEmailContactNoView}>
+                            <View>
+                              <Text style={styles.flatListText}>
+                                {item.locationDetails}
+                              </Text>
+                            </View>
+                            <View>
+                              <Text style={styles.flatListText}>
+                                {item.noFSlots}
+                              </Text>
+                            </View>
                           </View>
-                          <View>
-                            <Text
-                              style={styles.flatListText}>
-                              {item.noFSlots}
-                            </Text>
-                          </View>
+                          <Text style={styles.flatListText}>
+                            {item.locationAddress}
+                          </Text>
+                          <Text style={styles.flatListText}>
+                            {item.locationContactNo}
+                          </Text>
                         </View>
-                        <Text
-                          style={styles.flatListText}>
-                          {item.locationAddress}
-                        </Text>
-                        <Text
-                          style={styles.flatListText}>
-                          {item.locationContactNo}
-                        </Text>
-                      </View>
-                      <View style={styles.flatListContainer}>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => this.addSlots(index,item)}
-                        >
-                            <Text style={styles.buttonText}>
-                                Add Slots
-                            </Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.flatListContainer}>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => this.viewSlots(index,item)}
-                        >
-                            <Text style={styles.buttonText}>
-                                View Slots
-                            </Text>
-                        </TouchableOpacity>
-                      </View>
                         <View style={styles.flatListContainer}>
-                            <TouchableOpacity
-                                style={styles.button}
-                                onPress={() => this.delete(index,item)}
-                            >
-                                <Text style={styles.buttonText}>
-                                    Delete
-                                </Text>
-                            </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => this.addSlots(index, item)}>
+                            <Text style={styles.buttonText}>Add Slots</Text>
+                          </TouchableOpacity>
                         </View>
+                        <View style={styles.flatListContainer}>
+                          <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => this.viewSlots(index, item)}>
+                            <Text style={styles.buttonText}>View Slots</Text>
+                          </TouchableOpacity>
+                        </View>
+                        <View style={styles.flatListContainer}>
+                          <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => this.delete(index, item)}>
+                            <Text style={styles.buttonText}>Delete</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                )}
-                keyExtractor={(item, index) => `${index}`}
-              />
-            </View>
-          </ScrollView>
-        </>
+                  )}
+                  keyExtractor={(item, index) => `${index}`}
+                />
+              </View>
+            </ScrollView>
+          </>
         ) : (
           <View>
             <Text>Welcome</Text>
@@ -215,35 +186,32 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'cover',
     width: wp('100%'),
-    backgroundColor:'#f98b34'
+    backgroundColor: '#f98b34',
   },
   //container View
   container: {
-    borderWidth:1,
-    flexDirection:'row',
+    borderWidth: 1,
+    flexDirection: 'row',
   },
   image: {
     marginVertical: 5,
     width: wp('10%'),
-    height: hp("6.5%"),
+    height: hp('6.5%'),
     marginHorizontal: 5,
   },
-  containerTextHeader:{
-    fontSize:28,
-    fontWeight:'bold',
-    alignSelf:'center',
-    marginHorizontal:50
+  containerTextHeader: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginHorizontal: 50,
   },
-  container1TextHeader:{
-    fontSize:28,
-    fontWeight:'bold',
-    alignSelf:'center',
-    marginHorizontal:90
+  container1TextHeader: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginHorizontal: 90,
   },
   //container1 View
-  container1: {
-    // height: hp('100%'),
-  },
   list: {
     width: wp('100%'),
   },
@@ -281,7 +249,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   button: {
-    backgroundColor:'#f39c12',
+    backgroundColor: '#f39c12',
     borderRadius: 10,
     marginVertical: 5,
     marginHorizontal: 10,

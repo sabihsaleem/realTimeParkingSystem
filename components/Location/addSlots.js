@@ -10,7 +10,6 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import auth from '@react-native-firebase/auth';
 import {firebase} from '@react-native-firebase/database';
 import {
@@ -34,19 +33,21 @@ export default class addSlots extends React.Component {
   }
 
   componentDidMount = () => {
-    console.log("this.props",this.props.route.params.item)
+
     let data = this.props.route.params.item
     let locationData = [];
+
     locationData.push(data);
-    console.log(locationData, 'locationData',locationData[0].locationAddress);
+
     let slots = locationData[0].Slots
     let SlotsList = [];
-    for (let keySlot in slots) {
+
+    for ( let keySlot in slots ) {
         // console.log("key", key)
         const value = {...slots[keySlot], keySlot};
         SlotsList.unshift(value);
     }
-    console.log(SlotsList, 'SlotsList');
+
     this.setState({
        locationAddress:locationData[0].locationAddress,
        locationName:locationData[0].locationName,
@@ -54,14 +55,23 @@ export default class addSlots extends React.Component {
        locationKey:locationData[0].key,
        SlotsList,
     });
+
   };
 
-  onCreate(locationName, noFSLots, locationAddress, locationContactNo){
+  onCreate (
+    locationName,
+    noFSLots, 
+    locationAddress, 
+    locationContactNo
+  ) {
+
     let slot = this.state.SlotsList.length+1
-      if(slot>=11){  
+      if( slot>=11 ) {  
+
         this.props.navigation.navigate('LocationView');
         Alert.alert("Warning!","Maximum Slots Capacity Reached")
-      }else{
+
+      }else {
         firebase
         .database()
         .ref('Location/'+this.state.locationKey+'/Slots')
@@ -84,9 +94,8 @@ export default class addSlots extends React.Component {
 
   render() {
     const {locationAddress,locationName,locationContactNo,noFSLots,SlotsList} = this.state
-    console.log('data',locationAddress,locationName,locationContactNo,)
-    console.log('SlotsList.length',SlotsList.length+1)
     let slot = SlotsList.length+1
+    
     return (
       <View
         style={styles.main}>

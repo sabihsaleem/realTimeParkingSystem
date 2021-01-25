@@ -4,11 +4,8 @@ import {
   View,
   TextInput,
   Text,
-  ImageBackground,
   TouchableOpacity,
   Image,
-  ScrollView,
-  Alert,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {firebase} from '@react-native-firebase/database';
@@ -17,26 +14,8 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
 import DateTimePicker from 'react-native-modal-datetime-picker';
-
-let config = {
-  appId: '1:760692111499:android:cbe6dde0892631f7debc8e',
-  apiKey: 'AIzaSyAeHo_npJGSLNSOtLfibdZpYKtkB5NqXTI',
-  authDomain:
-    '760692111499-88l985a4au0v94t3lg6sd8vbstor5d0f.apps.googleusercontent.com',
-  databaseURL:
-    'https://realtimeparkingbookingsystem-default-rtdb.firebaseio.com/',
-  projectId: 'realtimeparkingbookingsystem',
-  storageBucket: 'realtimeparkingbookingsystem.appspot.com',
-  messagingSenderId: '',
-  project_number: '760692111499',
-};
-let app;
-if (firebase.apps.length === 0) {
-  app = firebase.initializeApp(config);
-}
 
 export default class AddBooking extends React.Component {
   constructor(props) {
@@ -88,16 +67,6 @@ export default class AddBooking extends React.Component {
     weekday[4] = 'Thursday';
     weekday[5] = 'Friday';
     weekday[6] = 'Saturday';
-    // console.log('A date has been picked: ', date);
-    // console.log(
-    //   date.getHours(),
-    //   ':',
-    //   date.getMinutes(),
-    //   ':',
-    //   date.getSeconds(),
-    //   'time',
-    //   date.getTime(),
-    // );
 
     const sDate = new Date(date.getTime());
     sDate.setSeconds(0);
@@ -107,58 +76,10 @@ export default class AddBooking extends React.Component {
     eDate.setSeconds(0);
     eDate.setMilliseconds(0);
     eDate.setMilliseconds(3540000);
-    console.log("Array",this.state.array)
-    // console.log(sDate, 'eDate/n',eDate);
 
-    console.log(
-      sDate.getTime(),
-      'sDate.getTime()',
-      eDate.getTime(),
-      'eDate.getTime()',
-    );
+    let startDateTime = sDate.getHours()+':'+sDate.getMinutes()+':'+sDate.getSeconds()
+    let endDateTime = eDate.getHours()+':'+eDate.getMinutes()+':'+eDate.getSeconds()
 
-    let x = this.state.array.filter((value) => {
-      const current = new Date();
-      current.setMilliseconds(0);
-      current.setSeconds(0);
-
-      const cond =
-        current.getTime() >= value.startTimeStamp &&
-        current.getTime() <= value.endTimeStamp;
-      if (cond) {
-        console.log("you cannot book now")
-        alert("Already in use")
-        this.setState({bookedTime:true})
-      } else{
-        console.log("you can book now")
-        this.setState({bookedTime:false})
-      }
-    });
-    // for (let x in this.state.array) {
-    //   // console.log('array[x]',this.state.array[x])\
-    //   // if(this.state.array[x].startTimeStamp<=eDate.getTime()){
-    //   //   console.log('true')
-    //   //   alert("Already in use")
-    //   //   this.setState({bookedTime:true})
-    //   //   break
-    //   // }else{
-    //   //   console.log('false')
-    //   //   this.setState({bookedTime:false})
-    //   // }
-    // }
-
-    // let zzz = this.state.array.filter(el=>el.startTimeStamp === sDate.getTime())
-    // console.log(zzz)
-
-    // console.log(
-    //   date.getFullYear() +
-    //     ' ' +
-    //     (date.getMonth() + 1) +
-    //     '/' +
-    //     date.getDate() +
-    //     '  ' +
-    //     weekday[d.getDay()],
-    // );
     let dateSelected =
       date.getFullYear() +
       ' ' +
@@ -167,11 +88,13 @@ export default class AddBooking extends React.Component {
       date.getDate() +
       '  ' +
       weekday[d.getDay()];
+      
     this.hideDateTimePicker();
+
     this.setState({
       currentDate: dateSelected,
-      startTime: sDate,
-      endTime: eDate,
+      startTime: startDateTime,
+      endTime: endDateTime,
       startTimeStamp: sDate.getTime(),
       endTimeStamp: eDate.getTime(),
     });
@@ -179,34 +102,21 @@ export default class AddBooking extends React.Component {
 
   componentDidMount() {
     const user = auth().currentUser;
-    console.log('this.props.route.params.item.key', this.props.route.params.item.key);
-    console.log('this.props.route.params.locationKey', this.props.route.params.locationKey);
     let key = this.props.route.params.item.key
     let locationType = this.props.route.params.item.locationName
-    console.log('locationType',locationType );
-    this.setState({
-      key,
-      locationType,
-    })
-    console.log('user', user);
     firebase
       .database()
       .ref('User')
       .on('value', (snapshot) => {
-        // console.log("snapshot.val()", snapshot.val())
         const getValue = snapshot.val();
-        // console.log("getValue", getValue)
         let array = [];
-        for (let key in getValue) {
-          // console.log("key", key)
+        for ( let key in getValue ) {
           const value = {...getValue[key], key};
           array.push(value);
         }
-        // console.log(array, 'array');
         const currentUser = array.filter(
           (el) => el.email.toLowerCase() === user.email.toLowerCase(),
         );
-        // console.log('currentUser', currentUser);
         this.setState({
           name: currentUser[0].name,
           email: currentUser[0].email,
@@ -216,23 +126,19 @@ export default class AddBooking extends React.Component {
       });
     firebase
       .database()
-      .ref('Location/'+this.props.route.params.locationKey+'/Slots/'+this.props.route.params.item.key+'/bookedUsers')
+      .ref('Location/'+locationKey+'/Slots/'+key+'/bookedUsers')
       .on('value', (snapshot) => {
-        console.log("bookedUsers.val()", snapshot.val())
         const getValue = snapshot.val();
-        // console.log("bookedUsers", getValue)
         let array = [];
-        for (let key in getValue) {
-          // console.log("key", key)
+        for ( let key in getValue ) {
           const value = {...getValue[key], key};
           array.push(value);
         }
-        console.log(array, 'arraybookedUsers');
         this.setState({array});
       });
   }
 
-  onAddBooking(
+  onAddBooking = (
     key,
     name,
     email,
@@ -244,57 +150,65 @@ export default class AddBooking extends React.Component {
     startTimeStamp,
     endTimeStamp,
     currentDate,
-  ) {
-    // if (this.state.bookedTime === true) {
-    //   console.log('true', this.state.bookedTime);
-    //   alert('Change your selected time');
-    // } else {
-    //   console.log('false', this.state.bookedTime);
-    // }
-    firebase
-    .database()
-    .ref('User/' + this.state.key + '/Booking')
-    .push({
-      UserKey: key,
-      vehicleName,
-      vehicleType,
-      locationType,
-      currentDate,
-      startTime,
-      endTime,
-    })
-    .then(() => {
-      firebase
-        .database()
-        .ref('Location/'+this.props?.route?.params?.locationKey+'/Slots/'+this.props?.route?.params?.item?.key+'/bookedUsers')
-        .child(this.state.key)
-        .set({
-          UserKey: key,
-          name,
-          email,
-          vehicleName,
-          vehicleType,
-          locationType,
-          startTime,
-          endTime,
-          startTimeStamp,
-          endTimeStamp,
-          currentDate,
-        })
-        .then((err) => {
-          console.log(err, 'Data update.');
-        })
-        .catch((error) => {
-          console.log('Failed: ' + error.message);
-        });
-      console.log('Data update.');
-      alert('Data update.');
-      this.props?.navigation?.navigate('User');
-    })
-    .catch((error) => {
-      console.log('failed: ' + error.message);
-    });
-    
+  ) => {
+    if ( 
+      this.state.currentDate &&
+      this.state.startTime &&
+      this.state.endTime &&
+      this.state.locationType &&
+      this.state.locationType &&
+      this.state.vehicleType &&
+      this.state.vehicleName
+    ) {
+      
+        firebase
+      .database()
+      .ref('User/' + this.state.key + '/Booking')
+      .push({
+        UserKey: key,
+        vehicleName,
+        vehicleType,
+        locationType,
+        currentDate,
+        startTime,
+        endTime,
+      })
+      .then(() => {
+        firebase
+          .database()
+          .ref('Location/'+this.props?.route?.params?.locationKey+'/Slots/'+this.props?.route?.params?.item?.key+'/bookedUsers')
+          .child(this.state.key)
+          .set({
+            UserKey: key,
+            name,
+            email,
+            vehicleName,
+            vehicleType,
+            locationType,
+            startTime,
+            endTime,
+            startTimeStamp,
+            endTimeStamp,
+            currentDate,
+          })
+          .then((err) => {
+            console.log(err, 'Data update.');
+          })
+          .catch((error) => {
+            console.log('Failed: ' + error.message);
+          });
+        console.log('Data update.');
+        alert('Data update.');
+        this.props?.navigation?.navigate('User');
+      })
+      .catch((error) => {
+        console.log('failed: ' + error.message);
+      });
+
+    }
+    else {
+      alert('Enter Data Please');
+    }
   }
 
   render() {
@@ -312,7 +226,6 @@ export default class AddBooking extends React.Component {
       endTimeStamp,
       bookedTime,
     } = this.state;
-    console.log('bookedTime', bookedTime,locationType);
     return (
       <View style={styles.main}>
         {this.state.isLoading ? (
@@ -370,12 +283,11 @@ export default class AddBooking extends React.Component {
                   width: wp('96%'),
                   alignSelf: 'center',
                 }}
-                style={{backgroundColor: '#f98b34',borderColor: '#67bae3',borderWidth:2}}
-                itemStyle={{
-                  justifyContent: 'flex-start',color: 'white'
-                }}
-                dropDownStyle={{backgroundColor: '#f98b34',borderColor: '#67bae3',borderWidth:2}}
-                labelStyle={{textAlign: 'left',color: 'white'}}
+                style={{ backgroundColor: '#f98b34',borderColor: '#67bae3',borderWidth:2, }}
+                itemStyle={{ justifyContent: 'flex-start', }}
+                dropDownStyle={{ backgroundColor: '#f17b30', color: 'white' }}
+                labelStyle={{ textAlign: 'left',color: 'white' }}
+                placeholderStyle={{ color: 'white' }}
                 onChangeItem={(item) => this.changeVehicleType(item)}
               />
               <Text style={styles.textContainer2}>Location:</Text>
@@ -475,9 +387,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   //container2
-  container2: {
-    // backgroundColor:'blue',
-  },
   textContainer2: {
     marginHorizontal: 10,
     marginVertical: 10,
@@ -491,6 +400,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#67bae3',
     paddingHorizontal: 10,
+    color: 'white',
   },
   //conatainer3
   container3: {

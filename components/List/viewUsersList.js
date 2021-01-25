@@ -10,53 +10,48 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import auth from '@react-native-firebase/auth';
 import {firebase} from '@react-native-firebase/database';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class viewUsersList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoading: true,
-      viewUsersListNonAdmin:[],
+      viewUsersListNonAdmin: [],
     };
   }
 
   componentDidMount = () => {
     const user = auth().currentUser;
-    console.log('user', user);
+
     firebase
       .database()
       .ref('User')
       .on('value', (snapshot) => {
-        console.log("viewUsersList.val()", snapshot.val())
         const getValue = snapshot.val();
-        console.log("viewUsersListgetValue", getValue)
+
         let viewUsersList = [];
         for (let key in getValue) {
-          // console.log("key", key)
           const value = {...getValue[key], key};
           viewUsersList.push(value);
         }
-        console.log(viewUsersList, 'viewUsersList');
-        const viewUsersListNonAdmin = viewUsersList.filter(el => el.isAdmin === false)
+
+        const viewUsersListNonAdmin = viewUsersList.filter(
+          (el) => el.isAdmin === false,
+        );
+
         this.setState({
-            viewUsersListNonAdmin,
+          viewUsersListNonAdmin,
         });
       });
   };
 
   emptyComponent = () => {
-    // if(this.state.list.length===null){
-    //   this.props.navigation.goBack();
-
-    // }
     return (
       <View
         style={{
@@ -83,40 +78,36 @@ export default class viewUsersList extends React.Component {
     );
   };
 
-  feeddbackList(index,item) {
-    this.props.navigation.navigate('viewFeedBackList',{
+  feeddbackList (index, item) {
+    this.props.navigation.navigate('viewFeedBackList', {
       item,
-    })
+    });
   }
 
-  delete(index,item) {
-    let deleted = 'User/' + item.key
-    console.log("delete",deleted)
+  delete (index, item) {
+    let deleted = 'User/' + item.key;
+    console.log('delete', deleted);
     firebase.database().ref(deleted).remove();
   }
 
   render() {
-    const {viewUsersListNonAdmin} = this.state
-    // console.log("viewUsersListNonAdmin",viewUsersListNonAdmin)
+    const {viewUsersListNonAdmin} = this.state;
+
     return (
-      <View
-        style={styles.main}>
+      <View style={styles.main}>
         {this.state.isLoading ? (
           <ScrollView>
             <View style={styles.container}>
               <TouchableOpacity
                 onPress={() => {
                   this.props.navigation.goBack();
-                }}
-                >
-                  <Image
-                    style={styles.image}
-                    source={require('../../back-button-icon-png-25.jpg')}
-                  />
+                }}>
+                <Image
+                  style={styles.image}
+                  source={require('../../back-button-icon-png-25.jpg')}
+                />
               </TouchableOpacity>
-              <Text style={styles.containerTextHeader}>
-                Users List
-              </Text>
+              <Text style={styles.containerTextHeader}>Users List</Text>
             </View>
             <View style={styles.container1}>
               <FlatList
@@ -124,53 +115,38 @@ export default class viewUsersList extends React.Component {
                 data={viewUsersListNonAdmin}
                 ListEmptyComponent={() => this.emptyComponent()}
                 renderItem={({item, index}) => (
-                  <View
-                    style={styles.container1FlatlistView}>
+                  <View style={styles.container1FlatlistView}>
                     <View style={{marginVertical: 5}}>
-                    
                       <View style={{justifyContent: 'space-between'}}>
-                        <Text
-                          style={styles.flatListNameText}>
+                        <Text style={styles.flatListNameText}>
                           {item.name.toUpperCase()}
                         </Text>
-                        <View
-                          style={styles.flatListEmailContactNoView}>
+                        <View style={styles.flatListEmailContactNoView}>
                           <View>
-                            <Text
-                              style={styles.flatListText}>
+                            <Text style={styles.flatListText}>
                               {item.email}
                             </Text>
                           </View>
                           <View>
-                            <Text
-                              style={styles.flatListText}>
+                            <Text style={styles.flatListText}>
                               {item.contactNo}
                             </Text>
                           </View>
                         </View>
-                        <Text
-                          style={styles.flatListText}>
-                          {item.address}
-                        </Text>
+                        <Text style={styles.flatListText}>{item.address}</Text>
                       </View>
                       <View style={styles.flatListContainer}>
                         <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => this.feeddbackList(index,item)}
-                        >
-                            <Text style={styles.buttonText}>
-                                Feedback List
-                            </Text>
+                          style={styles.button}
+                          onPress={() => this.feeddbackList(index, item)}>
+                          <Text style={styles.buttonText}>Feedback List</Text>
                         </TouchableOpacity>
                       </View>
                       <View style={styles.flatListContainer}>
                         <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => this.delete(index,item)}
-                        >
-                            <Text style={styles.buttonText}>
-                                Delete
-                            </Text>
+                          style={styles.button}
+                          onPress={() => this.delete(index, item)}>
+                          <Text style={styles.buttonText}>Delete</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -195,35 +171,32 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'cover',
     width: wp('100%'),
-    backgroundColor:'#f98b34'
+    backgroundColor: '#f98b34',
   },
   //container View
   container: {
-    borderWidth:1,
-    flexDirection:'row',
+    borderWidth: 1,
+    flexDirection: 'row',
   },
   image: {
     marginVertical: 5,
     width: wp('10%'),
-    height: hp("6.5%"),
+    height: hp('6.5%'),
     marginHorizontal: 5,
   },
-  containerTextHeader:{
-    fontSize:28,
-    fontWeight:'bold',
-    alignSelf:'center',
-    marginHorizontal:90
+  containerTextHeader: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginHorizontal: 90,
   },
-  container1TextHeader:{
-    fontSize:28,
-    fontWeight:'bold',
-    alignSelf:'center',
-    marginHorizontal:90
+  container1TextHeader: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginHorizontal: 90,
   },
   //container1 View
-  container1: {
-    // height: hp('100%'),
-  },
   list: {
     width: wp('100%'),
   },
@@ -261,7 +234,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   button: {
-    backgroundColor:'#f39c12',
+    backgroundColor: '#f39c12',
     borderRadius: 10,
     marginVertical: 5,
     marginHorizontal: 10,

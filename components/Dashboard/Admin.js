@@ -2,14 +2,9 @@ import React from 'react';
 import {
   StyleSheet,
   View,
-  TextInput,
   Text,
-  ImageBackground,
   TouchableOpacity,
-  ScrollView,
-  Alert,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {firebase} from '@react-native-firebase/database';
 import auth from '@react-native-firebase/auth';
 import {
@@ -17,23 +12,6 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-let config = {
-  appId: '1:760692111499:android:cbe6dde0892631f7debc8e',
-  apiKey: 'AIzaSyAeHo_npJGSLNSOtLfibdZpYKtkB5NqXTI',
-  authDomain:
-    '760692111499-88l985a4au0v94t3lg6sd8vbstor5d0f.apps.googleusercontent.com',
-  databaseURL:
-    'https://realtimeparkingbookingsystem-default-rtdb.firebaseio.com/',
-  projectId: 'realtimeparkingbookingsystem',
-  storageBucket: 'realtimeparkingbookingsystem.appspot.com',
-  messagingSenderId: '',
-  project_number: '760692111499',
-};
-let app;
-if (firebase.apps.length === 0) {
-  app = firebase.initializeApp(config);
-}
 
 export default class Admin extends React.Component {
   constructor(props) {
@@ -46,67 +24,54 @@ export default class Admin extends React.Component {
 
   componentDidMount() {
     const user = auth().currentUser;
-    // console.log('user', user);
     firebase
       .database()
       .ref('User')
       .on('value', (snapshot) => {
-        // console.log('snapshot.val()', snapshot.val());
         const getValue = snapshot.val();
-        // console.log('getValue', getValue);
         let array = [];
-        for (let key in getValue) {
-          // console.log("key", key)
+        for ( let key in getValue ) {
           const value = {...getValue[key], key};
           array.push(value);
         }
-        // console.log(array, 'array');
         const currentUser = array.filter(
           (el) => el.email.toLowerCase() === user.email.toLowerCase(),
         );
-        // console.log('currentUser[0]', currentUser);
-        this.setState({
+        this.setState ({
           name: currentUser[0].name,
         });
       });
   }
 
-  // viewBookedUsersList() {
-  //   this.setState = {
-  //     isLoading: false,
-  //   };
-  //   this.props.navigation.navigate('viewBookedUsersList');
-  // }
-
-  viewUsersList() {
+  viewUsersList () {
     this.setState = {
       isLoading: false,
     };
     this.props.navigation.navigate('viewUsersList');
   }
 
-  profile() {
+  profile () {
     this.setState = {
       isLoading: false,
     };
-    this.props.navigation.navigate('Profile');
+    this.props.navigation.navigate('AdminProfile');
   }
 
-  location() {
+  location () {
     this.setState = {
       isLoading: false,
     };
     this.props.navigation.navigate('Location');
   }
 
-  locationView() {
+  locationView () {
     this.setState = {
       isLoading: false,
     };
     this.props.navigation.navigate('LocationView');
   }
 
-  signOut() {
+  signOut () {
     auth()
       .signOut()
       .then(() => {
@@ -118,6 +83,7 @@ export default class Admin extends React.Component {
 
   render() {
     const {name} = this.state;
+
     return (
       <View style={styles.image}>
         {this.state.isLoading ? (
@@ -130,7 +96,7 @@ export default class Admin extends React.Component {
               <View style={{marginVertical: 10}}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => this.profile()}>
+                  onPress={ () => this.profile()}>
                   <Text style={styles.buttonText}>Profile</Text>
                 </TouchableOpacity>
               </View>
@@ -138,23 +104,15 @@ export default class Admin extends React.Component {
               <View style={{marginVertical: 10}}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => this.viewUsersList()}>
+                  onPress={ () => this.viewUsersList()}>
                   <Text style={styles.buttonText}>View Users List</Text>
                 </TouchableOpacity>
               </View>
 
-              {/* <View style={{marginVertical: 10}}>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => this.viewBookedUsersList()}>
-                  <Text style={styles.buttonText}>View Booked Users List</Text>
-                </TouchableOpacity>
-              </View> */}
-
               <View style={{marginVertical: 10}}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => this.location()}>
+                  onPress={ () => this.location()}>
                   <Text style={styles.buttonText}>Create Location Areas</Text>
                 </TouchableOpacity>
               </View>
@@ -162,7 +120,7 @@ export default class Admin extends React.Component {
               <View style={{marginVertical: 10}}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => this.locationView()}>
+                  onPress={ () => this.locationView()}>
                   <Text style={styles.buttonText}>View Location Areas </Text>
                 </TouchableOpacity>
               </View>
@@ -170,7 +128,7 @@ export default class Admin extends React.Component {
               <View style={{marginTop: 'auto'}}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => this.signOut()}>
+                  onPress={ () => this.signOut()}>
                   <Text style={styles.buttonText}>Sign out</Text>
                 </TouchableOpacity>
               </View>

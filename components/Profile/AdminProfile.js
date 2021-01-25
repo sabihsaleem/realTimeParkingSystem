@@ -18,7 +18,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-export default class Profile extends React.Component {
+export default class AdminProfile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -171,10 +171,6 @@ export default class Profile extends React.Component {
       });
   }
 
-  Read = () => {
-    this.setState({readMore: !this.state.readMore});
-  };
-
   render() {
     const {currentUser,name,email,address,contactNo,readMore,data} = this.state
 
@@ -206,7 +202,7 @@ export default class Profile extends React.Component {
                 renderItem={({item, index}) => (
                   <View
                     style={styles.container1FlatlistView}>
-                    <View style={{marginVertical: 5}}>
+                    <View style={{marginVertical: 10}}>
                     
                       <View style={{justifyContent: 'space-between'}}>
                         <Text
@@ -233,159 +229,6 @@ export default class Profile extends React.Component {
                           {item.address}
                         </Text>
                       </View>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          marginHorizontal: 10,
-                          marginVertical: 5,
-
-                        }}>
-                        <TouchableOpacity
-                          style={{
-                            width: wp('85%'),
-                          }}
-                          onPress={ () => this.Read() }>
-                          <Text
-                            style={{
-                              marginVertical: 3,
-                              marginHorizontal: 10,
-                              color: 'white',
-                              fontSize: 16,
-                              alignSelf:'center',
-                              borderColor: '#67bae3',
-                              borderWidth:0.5,
-                              padding:5
-                            }}>
-                            View Current Booked Slot
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      {readMore && (
-                        <View>
-                          <FlatList
-                            data={data}
-                            ListEmptyComponent={() => this.emptyComponent()}
-                            renderItem={({item, index}) => (
-                              <View
-                                style={{
-                                  marginVertical: 5,
-                                  width: '95%',
-                                  backgroundColor: '#e06100',
-                                }}>
-                                <View style={{marginVertical: 5}}>
-                                  <View
-                                    style={{justifyContent: 'space-between'}}>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 20,
-                                        fontWeight: 'bold',
-                                      }}>
-                                      Vehicle Name:
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 18,
-                                      }}>
-                                      {item.vehicleName}
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 20,
-                                        fontWeight: 'bold',
-                                      }}>
-                                      Vehicle Type:
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 18,
-                                      }}>
-                                      {item.vehicleType}
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 20,
-                                        fontWeight: 'bold',
-                                      }}>
-                                      Current Date:
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 18,
-                                      }}>
-                                      {item.currentDate}
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 20,
-                                        fontWeight: 'bold',
-                                      }}>
-                                      Location Area Name:
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 18,
-                                      }}>
-                                      {item.locationType}
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 20,
-                                        fontWeight: 'bold',
-                                      }}>
-                                      Start Time:
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 18,
-                                      }}>
-                                      {item.startTime.slice(10,19)}
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 20,
-                                        fontWeight: 'bold',
-                                      }}>
-                                      End time:
-                                    </Text>
-                                    <Text
-                                      style={{
-                                        paddingHorizontal: 20,
-                                        color: 'black',
-                                        fontSize: 18,
-                                      }}>
-                                      {item.endTime.slice(10,19)}
-                                    </Text>
-                                  </View>
-                                </View>
-                              </View>
-                            )}
-                            keyExtractor={(item, index) => `${index}`}
-                          />
-                        </View>
-                      )}
                     </View>
                   </View>
                 )}
@@ -520,10 +363,11 @@ const styles = StyleSheet.create({
   },
   list: {
     width: wp('100%'),
+    marginVertical: 10
   },
   container1FlatlistView: {
     borderRadius: 15,
-    marginVertical: 5,
+    marginVertical: 10,
     borderWidth: 2,
     width: '95%',
     alignSelf: 'center',
@@ -540,7 +384,7 @@ const styles = StyleSheet.create({
   flatListEmailContactNoView: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    marginVertical: 5,
+    marginVertical: 10,
     borderWidth: 0.5,
   },
   flatListEmailText: {

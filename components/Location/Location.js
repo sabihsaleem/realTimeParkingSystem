@@ -4,20 +4,16 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  FlatList,
   StyleSheet,
   ScrollView,
   Image,
-  Alert,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import auth from '@react-native-firebase/auth';
 import {firebase} from '@react-native-firebase/database';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class Location extends React.Component {
   constructor(props) {
@@ -32,7 +28,13 @@ export default class Location extends React.Component {
     };
   }
 
-  onCreate(locationName, locationDetails, noFSLots, locationAddress, locationContactNo){
+  onCreate (
+    locationName, 
+    locationDetails, 
+    noFSLots, 
+    locationAddress, 
+    locationContactNo
+  ) {
     if (
         this.state.locationName &&
         this.state.locationDetails &&
@@ -51,7 +53,6 @@ export default class Location extends React.Component {
             locationContactNo,
         })
         .then(() => {
-            console.log('Data update.');
             alert('Data update.');
         })
         .catch((error) => {

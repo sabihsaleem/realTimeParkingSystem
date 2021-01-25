@@ -30,22 +30,20 @@ export default class checkLocation extends React.Component {
   }
 
   componentDidMount = () => {
-    const user = auth().currentUser;
-    console.log('user', user);
     firebase
       .database()
       .ref('Location')
       .on('value', (snapshot) => {
-        console.log("viewLocation.val()", snapshot.val())
+
         const getValue = snapshot.val();
-        console.log("viewLocationValue", getValue)
+
         let viewLocationData = [];
-        for (let key in getValue) {
-          // console.log("key", key)
+
+        for ( let key in getValue ) {
           const value = {...getValue[key], key};
           viewLocationData.unshift(value);
         }
-        console.log(viewLocationData, 'viewLocationData');
+
         this.setState({
             viewLocationData,
         });
@@ -53,10 +51,6 @@ export default class checkLocation extends React.Component {
   };
 
   emptyComponent = () => {
-    // if(this.state.list.length===null){
-    //   this.props.navigation.goBack();
-
-    // }
     return (
       <View
         style={{
@@ -83,7 +77,7 @@ export default class checkLocation extends React.Component {
     );
   };
 
-  addSlots(index,item) {
+  CheckSlots ( index,item ) {
     this.props.navigation.navigate('ViewSlots',{
         item,
     })
@@ -154,7 +148,7 @@ export default class checkLocation extends React.Component {
                       <View style={styles.flatListContainer}>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => this.addSlots(index,item)}
+                            onPress={() => this.CheckSlots(index,item)}
                         >
                             <Text style={styles.buttonText}>
                                 Check Slots
@@ -210,9 +204,6 @@ const styles = StyleSheet.create({
     marginHorizontal:90
   },
   //container1 View
-  container1: {
-    // height: hp('100%'),
-  },
   list: {
     width: wp('100%'),
   },

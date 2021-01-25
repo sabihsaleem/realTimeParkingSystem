@@ -3,21 +3,15 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   FlatList,
   StyleSheet,
   ScrollView,
   Image,
-  Alert,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import auth from '@react-native-firebase/auth';
-import {firebase} from '@react-native-firebase/database';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class viewFeedBackList extends React.Component {
   constructor(props) {
@@ -29,9 +23,6 @@ export default class viewFeedBackList extends React.Component {
   }
 
   componentDidMount = () => {
-    const user = auth().currentUser;
-    console.log('user', user);
-    console.log("this.props",this.props.route.params.item.FeedBack)
     let data = this.props.route.params.item.FeedBack
     if(data==undefined){
       this.setState({
@@ -43,7 +34,7 @@ export default class viewFeedBackList extends React.Component {
         const value = {...data[keyData], keyData}
         dataArray.push(value)
       }
-      console.log('dataArray',dataArray)
+
       this.setState({
         dataArray,
       });
@@ -51,10 +42,6 @@ export default class viewFeedBackList extends React.Component {
   };
 
   emptyComponent = () => {
-    // if(this.state.list.length===null){
-    //   this.props.navigation.goBack();
-
-    // }
     return (
       <View
         style={{
@@ -83,7 +70,7 @@ export default class viewFeedBackList extends React.Component {
 
   render() {
     const {dataArray} = this.state
-    console.log("dataArray",dataArray)
+
     return (
       <View
         style={styles.main}>

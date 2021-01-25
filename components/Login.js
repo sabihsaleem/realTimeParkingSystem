@@ -6,7 +6,6 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  ScrollView,
   Alert,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -18,21 +17,6 @@ import {
 } from 'react-native-responsive-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-let config = {
-    appId: '1:760692111499:android:cbe6dde0892631f7debc8e',
-    apiKey: 'AIzaSyAeHo_npJGSLNSOtLfibdZpYKtkB5NqXTI',
-    authDomain: '760692111499-88l985a4au0v94t3lg6sd8vbstor5d0f.apps.googleusercontent.com',
-    databaseURL: 'https://realtimeparkingbookingsystem-default-rtdb.firebaseio.com/',
-    projectId: 'realtimeparkingbookingsystem',
-    storageBucket: 'realtimeparkingbookingsystem.appspot.com',
-    messagingSenderId: '',
-    project_number: "760692111499",
-  };
-let app;
-if (firebase.apps.length === 0) {
-app = firebase.initializeApp(config);
-}
-
 export default class Login extends React.Component {
   constructor(props) {
     super(props);
@@ -40,47 +24,46 @@ export default class Login extends React.Component {
       email: '',
       password: '',
       isLoading: true,
-      userList:[]
+      userList: [],
     };
   }
 
   componentDidMount() {
     firebase
-        .database()
-        .ref('User')
-        .on('value', (snapshot) => {
+      .database()
+      .ref('User')
+      .on('value', (snapshot) => {
         console.log("snapshot.val()", snapshot.val())
         const getValue = snapshot.val();
         console.log("getValue", getValue)
         let userArray = [];
         for (let key in getValue) {
-            // console.log("key", key)
             const value = {...getValue[key], key};
             userArray.push(value);
         }
         console.log(userArray,'accc');
-        this.setState({
+        this.setState ({
             userList: userArray,
         });
-        });
+      });
   }
 
   onLogin(){
     if (this.state.email && this.state.password) {
-        let x = this.state.userList.filter(
+        let xuserList = this.state.userList.filter (
           (el) => el.email.toLowerCase() === this.state.email.toLowerCase(),
         );
-        console.log('x', x);
-        if (x[0]) {
-          if (x[0].isAdmin === true) {
-            console.log('x');
+        console.log('xuserList', xuserList);
+        if ( xuserList[0] ) {
+          if ( xuserList[0].isAdmin === true ) {
+            console.log('xuserList');
             firebase
               .auth()
               .signInWithEmailAndPassword(this.state.email, this.state.password)
               .then(async (err) => {
                 console.log(err.user.email, 'Welcome!');
   
-                let Data = this.state.userList.filter(
+                let Data = this.state.userList.filter (
                   (el) => el.email === err.user.email,
                 );
                 console.log('data:', Data);
@@ -100,7 +83,7 @@ export default class Login extends React.Component {
                 Alert.alert('Error!', 'Incorrect Data');
               });
           } else {
-            console.log('xx');
+            console.log('xxuserList');
             firebase
               .auth()
               .signInWithEmailAndPassword(this.state.email, this.state.password)
@@ -138,12 +121,11 @@ export default class Login extends React.Component {
   }
 
   onRegister(){
-    this.props.navigation.navigate('Registeration')
+    this.props.navigation.navigate('Registration')
   }
 
   render() {
       const { userList, email, password } = this.state
-      // console.log(userList,'userList')
     return (
         <View style={styles.main}>
         {this.state.isLoading ?
@@ -152,8 +134,7 @@ export default class Login extends React.Component {
             <View style={styles.container}>
                 <TouchableOpacity
                     onPress={() => {
-                    // this.props.navigation.goBack();
-                    this.props.navigation.navigate('Home');
+                      this.props.navigation.navigate('Home');
                     }}
                 >
                     <Image
@@ -263,7 +244,8 @@ const styles = StyleSheet.create({
         width: wp('96%'),
         borderWidth:2,
         borderColor:'#67bae3',
-        paddingHorizontal:10
+        paddingHorizontal:10,
+        color: 'white'
     },
     //conatainer3
     container3:{

@@ -2,26 +2,17 @@ import 'react-native-gesture-handler';
 import * as React from 'react';
 import { View, Text, StyleSheet,TouchableOpacity, } from 'react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import {firebase} from '@react-native-firebase/database';
-import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class Home extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.state = {
-
-        }
-    }
-
-    componentDidMount(){
+    componentDidMount () {
         console.log("this.props", this.props)
         AsyncStorage.getItem('@User').then((
           value => {
           console.log(JSON.parse(value))
           let d = JSON.parse(value)
-          let data=[] 
+          let data = [] 
           for (const element in d) {
               // console.log(element);
               value={...d[element],element}
@@ -30,19 +21,19 @@ export default class Home extends React.Component {
               )
           }
           console.log("data",data)
-          if(value === null){
+          if (value === null) {
             // this.props
             console.log("null")
             this.props.navigation.navigate('Home')
             
-          }else {
+          } else {
 
-            if(data[0].isAdmin===true){
+            if (data[0].isAdmin===true) {
               //redirect to admin
               console.log("Admin")
               this.props.navigation.navigate('Admin')
             }
-            else{
+            else {
               //redirect to User
               console.log("User")
               this.props.navigation.navigate('User')
@@ -53,12 +44,12 @@ export default class Home extends React.Component {
     
     }
 
-    login(){
+    login () {
         this.props.navigation.navigate("Login")
     }
 
-    registeration(){
-        this.props.navigation.navigate("Registeration")
+    registration () {
+        this.props.navigation.navigate("Registration")
     }
 
     render(){
@@ -70,15 +61,15 @@ export default class Home extends React.Component {
                 <View style={styles.container2}>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={()=> this.login()}
+                        onPress={ ()=> this.login ()}
                         >
                         <Text style={styles.buttonText}>Login</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={()=> this.registeration()}
+                        onPress={ ()=> this.registration ()}
                         >
-                        <Text style={styles.buttonText}>Registeration</Text>
+                        <Text style={styles.buttonText}>Registration</Text>
                     </TouchableOpacity>
                 </View>
             </View>
