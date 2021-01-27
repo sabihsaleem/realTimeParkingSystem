@@ -12,139 +12,132 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {GoogleSignin} from '@react-native-community/google-signin';
 
-export default class User extends React.Component {
+GoogleSignin.configure({
+    webClientId:
+      '760692111499-88l985a4au0v94t3lg6sd8vbstor5d0f.apps.googleusercontent.com',
+});
+
+export default class Facebook extends React.Component {
   constructor(props) {
     super(props);
+    const user = auth().currentUser;
     this.state = {
         isLoading: true,
-        name: '',
-        bookingKey: null,
+        name: user.displayName,
         feedbackKey: null,
-        keyCurrentUser: '',
+        keyCurrentUser: user.uid
     };
   }
 
   componentDidMount () {
     const user = auth().currentUser;
     AsyncStorage.getItem('@User').then((
-      value => {
-      console.log(JSON.parse(value))
-      let d = JSON.parse(value)
-      let name = [] 
-      for (const element in d) {
-          value={...d[element],element}
-          name.push(
-              value
-          )
-      }
-      console.log("name",name[0].key)
-      this.setState({name:name[0].name,keyCurrentUser:name[0].key})
-    }))
+        value => {
+        // console.log(JSON.parse(value))
+        let d = JSON.parse(value)
+        let data = [] 
+        for (const element in d) {
+            value={...d[element]}
+            data.push(
+                value
+            )
+        }
+        console.log("data",data)
+        this.setState({data:data[0].name})
+      }))
+    console.log(user,'user')
     firebase
-      .database()
-      .ref('User')
-      .on('value', (snapshot) => {
+    .database()
+    .ref('User')
+    .on('value', (snapshot) => {
 
-        const getValue = snapshot.val();
-        let array = [];
-        for ( let key in getValue ) {
-          const value = {...getValue[key], key};
-          array.push(value);
+      const getValue = snapshot.val();
+      let array = [];
+      for ( let key in getValue ) {
+        const value = {...getValue[key], key};
+        array.push(value);
+      }
+
+      const currentUser = array.filter(
+        (el) => el.email.toLowerCase() === user.email.toLowerCase(),
+      );
+      console.log('currentUser',currentUser)
+      var feedbackValue = currentUser[0].FeedBack
+      
+      var bookingValue = currentUser[0].Booking
+
+      if( feedbackValue===undefined ) {
+      }else {
+        let feedbackData = []
+        for( let feedbackKey in feedbackValue ) {
+            const value = {...feedbackValue[feedbackKey],feedbackKey}
+            feedbackData.push(value)
         }
 
-        const currentUser = array.filter(
-          (el) => el.email.toLowerCase() === user.email.toLowerCase(),
-        );
-        
-        var feedbackValue = currentUser[0].FeedBack
-        
-        var bookingValue = currentUser[0].Booking
-
-        if( feedbackValue===undefined ) {
-        }else {
-          let feedbackData = []
-          for( let feedbackKey in feedbackValue ) {
-              const value = {...feedbackValue[feedbackKey],feedbackKey}
-              feedbackData.push(value)
+        this.setState({
+            feedbackKey: feedbackData[0].feedbackKey,
+        });
+      
+      };
+        firebase
+        .database()
+        .ref('Location')
+        .on('value', (snapshot) => {
+  
+          const getValue = snapshot.val();
+          let arrayLocation = [];
+          for ( let keyLocation in getValue ) {
+            const value = {...getValue[keyLocation], keyLocation};
+            arrayLocation.push(value);
           }
-
-          this.setState({
-              feedbackKey: feedbackData[0].feedbackKey,
-          });
-        
-        };
-          if( bookingValue===undefined ) {
-          }else {
-            let bookingData = []
-            for ( let bookingKey in bookingValue ){
-              const value = {...bookingValue[bookingKey],bookingKey}
-              bookingData.push(value)
-            }
   
-            this.setState({
-                bookingKey: bookingData[0].bookingKey,
-            });
+          let dateCurrent = new Date();
+          dateCurrent.getTime()
+          dateCurrent.setSeconds(0);
+          dateCurrent.setMilliseconds(0);
+          for( let keydata of arrayLocation ){
   
-          };
-    });
-
-      firebase
-      .database()
-      .ref('Location')
-      .on('value', (snapshot) => {
-
-        const getValue = snapshot.val();
-        let arrayLocation = [];
-        for ( let keyLocation in getValue ) {
-          const value = {...getValue[keyLocation], keyLocation};
-          arrayLocation.push(value);
-        }
-
-        let dateCurrent = new Date();
-        dateCurrent.getTime()
-        dateCurrent.setSeconds(0);
-        dateCurrent.setMilliseconds(0);
-        for( let keydata of arrayLocation ){
-
-          if( keydata.Slots ){
-            let slots = keydata.Slots
-
-            for( let keydataSlots in slots ){
-
-              if( slots[keydataSlots].bookedUsers ){
-                let bookedUsers = slots[keydataSlots].bookedUsers
-
-                for ( let key in bookedUsers ) {
-                  let date = new Date(bookedUsers[key].startTimeStamp);
-                  let condition = 
-                                  dateCurrent.getTime()>=bookedUsers[key].endTimeStamp
-                                  &&
-                                  dateCurrent.getFullYear()===date.getFullYear()
-                                  &&
-                                  dateCurrent.getMonth()===date.getMonth()
-                                  &&
-                                  dateCurrent.getDate()===date.getDate()
-                                  &&
-                                  key===bookedUsers[key].UserKey
-                  if ( condition ) {
-
-                    let deleted = 'Location/'+keydata.keyLocation+'/Slots/'+keydataSlots+'/bookedUsers/'+key
-
-                    firebase.database().ref(deleted).remove();
-                    let deletes = 'User/'+this.state.keyCurrentUser+'/Booking/'+this.state.bookingKey
-
-                    firebase.database().ref(deletes).remove();
-
-                  }else {
-                    console.log('false')
+            if( keydata.Slots ){
+              let slots = keydata.Slots
+  
+              for( let keydataSlots in slots ){
+  
+                if( slots[keydataSlots].bookedUsers ){
+                  let bookedUsers = slots[keydataSlots].bookedUsers
+  
+                  for ( let key in bookedUsers ) {
+                    let date = new Date(bookedUsers[key].startTimeStamp);
+                    let condition = 
+                                    dateCurrent.getTime()>=bookedUsers[key].endTimeStamp
+                                    &&
+                                    dateCurrent.getFullYear()===date.getFullYear()
+                                    &&
+                                    dateCurrent.getMonth()===date.getMonth()
+                                    &&
+                                    dateCurrent.getDate()===date.getDate()
+                                    &&
+                                    key===bookedUsers[key].UserKey
+                    if ( condition ) {
+  
+                      let deleted = 'Location/'+keydata.keyLocation+'/Slots/'+keydataSlots+'/bookedUsers/'+key
+  
+                      firebase.database().ref(deleted).remove();
+                      let deletes = 'User/'+this.state.keyCurrentUser+'/Booking/'+this.state.keyCurrentUser
+  
+                      firebase.database().ref(deletes).remove();
+  
+                    }else {
+                      console.log('false')
+                    }
                   }
                 }
               }
             }
           }
-        }
-      });
+        });
+    });
   }
 
   locationView () {
@@ -168,6 +161,12 @@ export default class User extends React.Component {
         this.props.navigation.navigate('Home');
         AsyncStorage.removeItem('@User');
       });
+    try {
+        GoogleSignin.revokeAccess();
+        GoogleSignin.signOut();
+    } catch (error) {
+    console.error(error);
+    }
   }
 
   feedBack () {
@@ -176,7 +175,6 @@ export default class User extends React.Component {
 
   render() {
     const {name,feedbackKey} = this.state
-
     return (
       <View style={styles.image}>
         {this.state.isLoading ? (

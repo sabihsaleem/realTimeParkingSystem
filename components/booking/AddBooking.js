@@ -104,13 +104,17 @@ export default class AddBooking extends React.Component {
     const user = auth().currentUser;
     let key = this.props.route.params.item.key
     let locationType = this.props.route.params.item.locationName
+    this.setState({
+      key,
+      locationType,
+    })
     firebase
       .database()
       .ref('User')
       .on('value', (snapshot) => {
         const getValue = snapshot.val();
         let array = [];
-        for ( let key in getValue ) {
+        for (let key in getValue) {
           const value = {...getValue[key], key};
           array.push(value);
         }
@@ -126,7 +130,7 @@ export default class AddBooking extends React.Component {
       });
     firebase
       .database()
-      .ref('Location/'+locationKey+'/Slots/'+key+'/bookedUsers')
+      .ref('Location/'+this.props.route.params.locationKey+'/Slots/'+this.props.route.params.item.key+'/bookedUsers')
       .on('value', (snapshot) => {
         const getValue = snapshot.val();
         let array = [];
@@ -387,6 +391,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   //container2
+  container2: {
+    // backgroundColor:'blue',
+  },
   textContainer2: {
     marginHorizontal: 10,
     marginVertical: 10,

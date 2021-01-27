@@ -151,6 +151,12 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (project.hasProperty('my-upload-key.keystore')) {
+            storeFile file('my-upload-key.keystore')
+            storePassword '1234'
+            keyAlias 'my-key-alias'
+            keyPassword '1234'
+        }
     }
     buildTypes {
         debug {
@@ -185,6 +191,9 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
+    implementation project(':react-native-fbsdk')
+    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+    implementation 'com.facebook.android:facebook-login:[8.1)'
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 

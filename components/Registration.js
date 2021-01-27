@@ -16,7 +16,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-export default class Registration extends React.Component {
+export default class Registeration extends React.Component {
   constructor(props) {
     super(props);
     this.state = {

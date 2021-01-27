@@ -19,6 +19,7 @@ import viewSlots from './components/List/viewSlots';
 import checkLocation from './components/Location/checkLocation';
 import viewSlotsList from './components/List/viewSlotsLists';
 import AdminProfile from './components/Profile/AdminProfile';
+import Facebook from './components/Dashboard/Facebook';
 
 const Stack = createStackNavigator();
 
@@ -43,6 +44,7 @@ export default function Routes() {
             <Stack.Screen name="checkLocation" component={checkLocation} />
             <Stack.Screen name="SlotsList" component={viewSlotsList} />
             <Stack.Screen name="AdminProfile" component={AdminProfile} />
+            <Stack.Screen name="Facebook" component={Facebook} />
         </Stack.Navigator>
     );
 }
